@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Configuration\ConfigurationLoader;
 use Romanzaycev\Fundamenta\Http\Server\OpenSwoole\OpenSwooleHelper;
 use Romanzaycev\Fundamenta\Http\Server\OpenSwoole\ServerFactory;
-use Romanzaycev\Fundamenta\Http\Server\Slim\AttributedRouterConfigurator;
 use Romanzaycev\Fundamenta\Modules\ModulesConfigurator;
 use Slim\App;
 use Slim\Factory\AppFactory;
@@ -124,8 +123,6 @@ class ApplicationBuilder
         foreach ($slimConfig["middlewares"] as $middleware) {
             $slimApp->add($middleware);
         }
-
-        AttributedRouterConfigurator::configure($slimApp);
     }
 
     protected function createApplication(App $slimApp, Server $server): Application

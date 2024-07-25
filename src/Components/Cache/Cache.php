@@ -1,11 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Bootstrappers;
+namespace Romanzaycev\Fundamenta\Components\Cache;
 
 use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Cache\CacheItemPoolInterface;
-use Romanzaycev\Fundamenta\Cache\PdoAdapterFactory;
+use Romanzaycev\Fundamenta\Bootstrappers\Dbal;
+use Romanzaycev\Fundamenta\Bootstrappers\Dotenv;
+use Romanzaycev\Fundamenta\Bootstrappers\Monolog;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
 use Symfony\Component\Cache\Psr16Cache;
@@ -18,7 +20,16 @@ class Cache extends ModuleBootstrapper
         $configuration->setDefaults(
             "cache",
             [
-                "adapter_factory" => PdoAdapterFactory::class,
+                "adapter_factory" => ArrayAdapterFactory::class,
+
+                "options" => [
+                    "array" => [
+                        "default_lifetime" => 0,
+                        "store_serialized" => false,
+                        "max_lifetime" => 0,
+                        "max_items" => 0,
+                    ],
+                ],
             ],
             [
                 "adapter_factory",
@@ -46,7 +57,7 @@ class Cache extends ModuleBootstrapper
         return [
             Dotenv::class,
             Monolog::class,
-            Postgres::class,
+            Dbal::class,
         ];
     }
 }
