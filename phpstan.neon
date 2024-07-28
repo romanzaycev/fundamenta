@@ -1,0 +1,10 @@
+parameters:
+  reportUnmatchedIgnoredErrors: false
+  level: 5
+  paths:
+    - src
+    - tests
+  tmpDir: build
+  ignoreErrors:
+    - message: '#(expects class-string, string given)|(expects array<class-string>, array<int, string>)#'
+      path: tests/Components/Startup/DependencyGraphTest.php

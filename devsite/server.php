@@ -1,14 +1,15 @@
 <?php declare(strict_types=1);
 
+use Romanzaycev\Devsite\Site;
 use Romanzaycev\Fundamenta\ApplicationBuilder;
-use Romanzaycev\Fundamenta\Configuration\ArrayLoader;
+use Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader;
 
 require dirname(__DIR__) . "/vendor/autoload.php";
 
 (function () {
-    $app = (new ApplicationBuilder(
+    OpenSwoole\Runtime::enableCoroutine(true, OpenSwoole\Runtime::HOOK_ALL);
+    $builder = (new ApplicationBuilder(
         dirname(__DIR__),
-        "",
         __DIR__,
         new ArrayLoader([
             "openswoole" => [
@@ -17,6 +18,9 @@ require dirname(__DIR__) . "/vendor/autoload.php";
                 ],
             ],
         ]),
-    ))->build();
-    $app->start();
+        [
+            Site::class
+        ]
+    ));
+    $builder->build()->start();
 })();

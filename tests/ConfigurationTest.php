@@ -22,7 +22,7 @@ class ConfigurationTest extends TestCase
     public function testGetAll(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->assertEquals(
             self::STUB,
@@ -33,7 +33,7 @@ class ConfigurationTest extends TestCase
     public function testGetItemByPath(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->assertEquals(
             1,
@@ -44,7 +44,7 @@ class ConfigurationTest extends TestCase
     public function testGetItemByPathInSection(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->assertEquals(
             1,
@@ -55,7 +55,7 @@ class ConfigurationTest extends TestCase
     public function testGetItemByPathInSection2(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->assertEquals(
             [
@@ -68,7 +68,7 @@ class ConfigurationTest extends TestCase
     public function testGetSection(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->assertEquals(
             [
@@ -81,7 +81,7 @@ class ConfigurationTest extends TestCase
     public function testGetNotFoundSection(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Unknown configuration section: foobarbaz");
@@ -91,7 +91,7 @@ class ConfigurationTest extends TestCase
     public function testValidate(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader([]),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader([]),
         );
         $instance->setDefaults("foobar", [], ["a"]);
         $this->expectException(\RuntimeException::class);
@@ -102,7 +102,7 @@ class ConfigurationTest extends TestCase
     public function testGetDefault(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->assertNull($instance->get("foo.b"));
     }
@@ -110,7 +110,7 @@ class ConfigurationTest extends TestCase
     public function testGetDefaultValue(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader(self::STUB),
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader(self::STUB),
         );
         $this->assertEquals(1, $instance->get("foo.b", 1));
     }
@@ -118,7 +118,7 @@ class ConfigurationTest extends TestCase
     public function testWithDefaults(): void
     {
         $instance = new Configuration(
-            new Configuration\ArrayLoader([
+            new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader([
                 "foo" => [
                     "c" => 4,
                 ],
@@ -163,7 +163,7 @@ class ConfigurationTest extends TestCase
 
     public function testWithDefaultsEmpty(): void
     {
-        $instance = new Configuration(new Configuration\ArrayLoader([]));
+        $instance = new Configuration(new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader([]));
         $instance->setDefaults("foo", [
             "a" => 1,
         ]);
@@ -176,7 +176,7 @@ class ConfigurationTest extends TestCase
 
     public function testWithDefaultsComplex(): void
     {
-        $instance = new Configuration(new Configuration\ArrayLoader([
+        $instance = new Configuration(new \Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader([
             "foo" => [
                 "a" => 1,
                 "b" => [

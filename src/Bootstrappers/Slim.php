@@ -2,9 +2,9 @@
 
 namespace Romanzaycev\Fundamenta\Bootstrappers;
 
+use Romanzaycev\Fundamenta\Components\Configuration\Env;
+use Romanzaycev\Fundamenta\Components\Server\Slim\HttpErrorHandler;
 use Romanzaycev\Fundamenta\Configuration;
-use Romanzaycev\Fundamenta\Env;
-use Romanzaycev\Fundamenta\Http\Server\Slim\HttpErrorHandler;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
 
 class Slim extends ModuleBootstrapper
@@ -39,6 +39,7 @@ class Slim extends ModuleBootstrapper
         return [
             Dotenv::class,
             Monolog::class,
+            OpenSwoole::class,
         ];
     }
 }

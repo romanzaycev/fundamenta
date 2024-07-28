@@ -6,10 +6,11 @@ use DI\ContainerBuilder;
 use OpenSwoole\Server;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use Romanzaycev\Fundamenta\Configuration\ConfigurationLoader;
-use Romanzaycev\Fundamenta\Http\Server\OpenSwoole\OpenSwooleHelper;
-use Romanzaycev\Fundamenta\Http\Server\OpenSwoole\ServerFactory;
-use Romanzaycev\Fundamenta\Modules\ModulesConfigurator;
+use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\OpenSwooleHelper;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
+use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
+use Romanzaycev\Fundamenta\Components\Startup\ModulesConfigurator;
 use Slim\App;
 use Slim\Factory\AppFactory;
 
@@ -17,10 +18,21 @@ class ApplicationBuilder
 {
     public function __construct(
         private readonly string $appPath,
-        private readonly string $appNamespace,
         private readonly string $dotenvPath,
         private readonly ConfigurationLoader $configurationLoader,
+        private array $bootstrappers,
     ) {}
+
+    /**
+     * @param class-string<Bootstrapper> $bootstrapper
+     * @return $this
+     */
+    public function add(string $bootstrapper): self
+    {
+        $this->bootstrappers[] = $bootstrapper;
+
+        return $this;
+    }
 
     /**
      * @throws \Psr\Container\ContainerExceptionInterface
@@ -32,7 +44,10 @@ class ApplicationBuilder
         $containerBuilder = $this->createContainerBuilder();
         $configuration = $this->createContainerConfiguration();
 
-        $modulesConfigurator = $this->createModulesConfigurator($containerBuilder, $configuration);
+        $modulesConfigurator = $this->createModulesConfigurator(
+            $containerBuilder,
+            $configuration,
+        );
         $modulesConfigurator->preconfigure();
         $configurationErrors = $configuration->validate();
 
@@ -58,7 +73,7 @@ class ApplicationBuilder
             return $slimApp->handle($request);
         }, $configuration);
 
-        $app = $this->createApplication($slimApp, $server);
+        $app = $this->createApplication($server);
         $container->set(Application::class, $app);
 
         $modulesConfigurator->configureRouters($container);
@@ -82,7 +97,6 @@ class ApplicationBuilder
             [
                 "app" => [
                     "path" => $this->appPath,
-                    "namespace" => $this->appNamespace,
                 ],
 
                 "dotenv" => [
@@ -94,7 +108,11 @@ class ApplicationBuilder
 
     protected function createModulesConfigurator(ContainerBuilder $containerBuilder, Configuration $configuration): ModulesConfigurator
     {
-        return new ModulesConfigurator($configuration, $containerBuilder);
+        return new ModulesConfigurator(
+            $configuration,
+            $containerBuilder,
+            $this->bootstrappers,
+        );
     }
 
     /**
@@ -125,8 +143,8 @@ class ApplicationBuilder
         }
     }
 
-    protected function createApplication(App $slimApp, Server $server): Application
+    protected function createApplication(Server $server): Application
     {
-        return new Application($slimApp, $server);
+        return new Application($server);
     }
 }

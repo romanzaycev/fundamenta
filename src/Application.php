@@ -8,7 +8,6 @@ use Slim\App;
 class Application
 {
     public function __construct(
-        private readonly App $slim,
         private readonly Server $server,
     ) {}
 

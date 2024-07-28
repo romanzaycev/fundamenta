@@ -2,7 +2,7 @@
 
 namespace Romanzaycev\Fundamenta;
 
-use Romanzaycev\Fundamenta\Configuration\ConfigurationLoader;
+use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
 
 class Configuration
 {

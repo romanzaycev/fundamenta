@@ -5,9 +5,9 @@ namespace Romanzaycev\Fundamenta\Bootstrappers;
 use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Log\LoggerInterface;
+use Romanzaycev\Fundamenta\Components\Configuration\Env;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
 use Romanzaycev\Fundamenta\Configuration;
-use Romanzaycev\Fundamenta\Env;
-use Romanzaycev\Fundamenta\Http\Server\OpenSwoole\ServerFactory;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
 
 class OpenSwoole extends ModuleBootstrapper
@@ -62,7 +62,7 @@ class OpenSwoole extends ModuleBootstrapper
     {
         return [
             Dotenv::class,
-            Slim::class,
+            Monolog::class,
         ];
     }
 }

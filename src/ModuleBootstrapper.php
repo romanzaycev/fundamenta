@@ -3,6 +3,7 @@
 namespace Romanzaycev\Fundamenta;
 
 use DI\ContainerBuilder;
+use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
 
 abstract class ModuleBootstrapper implements Bootstrapper
 {
