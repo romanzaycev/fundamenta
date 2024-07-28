@@ -76,7 +76,7 @@ class ApplicationBuilder
         $app = $this->createApplication($server);
         $container->set(Application::class, $app);
 
-        $modulesConfigurator->configureRouters($container);
+        $modulesConfigurator->afterContainerBuilt($container);
 
         return $app;
     }
@@ -85,7 +85,7 @@ class ApplicationBuilder
     {
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->useAutowiring(true);
-        $containerBuilder->useAutowiring(false);
+        $containerBuilder->useAttributes(true);
 
         return $containerBuilder;
     }

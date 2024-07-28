@@ -42,11 +42,11 @@ final class ModulesConfigurator
     /**
      * @throws \Throwable
      */
-    public function configureRouters(Container $container): void
+    public function afterContainerBuilt(Container $container): void
     {
         foreach ($this->getSorted() as $bootstrapper) {
-            if (method_exists($bootstrapper, "router")) {
-                $container->call([$bootstrapper, "router"]);
+            if (method_exists($bootstrapper, "afterContainerBuilt")) {
+                $container->call([$bootstrapper, "afterContainerBuilt"]);
             }
         }
     }
@@ -67,8 +67,6 @@ final class ModulesConfigurator
             $this->sorted[] = $classString;
         }
 
-        var_dump($this->sorted);
-
         return $this->sorted;
     }
 
@@ -81,13 +79,22 @@ final class ModulesConfigurator
         self::validateBootstrapperClasses($classes);
         $dependencyClasses = [];
 
-        foreach ($classes as $class) {
-            $dependencyClasses = array_merge($dependencyClasses, call_user_func([$class, "requires"]));
-        }
+        $visitor = function (array $classes) use (&$dependencyClasses, &$visitor) {
+            foreach ($classes as $class) {
+                $deps = call_user_func([$class, "requires"]);
 
+                foreach ($deps as $r) {
+                    $dependencyClasses[] = $r;
+                }
+
+                $visitor($deps);
+            }
+        };
+
+        $visitor($classes);
         $dependencyClasses = array_values(array_unique($dependencyClasses));
-        self::validateBootstrapperClasses($classes);
         $classes = array_merge($classes, $dependencyClasses);
+        self::validateBootstrapperClasses($classes);
 
         $dg = new DependencyGraph();
 

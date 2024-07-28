@@ -17,9 +17,12 @@ require dirname(__DIR__) . "/vendor/autoload.php";
                     "document_root" => __DIR__ . "/public",
                 ],
             ],
+            "tooolooop" => [
+                "directory" => __DIR__ . "/views",
+            ],
         ]),
         [
-            Site::class
+            Site::class,
         ]
     ));
     $builder->build()->start();

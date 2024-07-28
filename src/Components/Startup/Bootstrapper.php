@@ -6,7 +6,7 @@ use DI\ContainerBuilder;
 use Romanzaycev\Fundamenta\Configuration;
 
 /**
- * @method void router(mixed ...$args)
+ * @method void afterContainerBuilt(mixed ...$args)
  */
 interface Bootstrapper
 {
