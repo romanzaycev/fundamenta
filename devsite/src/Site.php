@@ -10,9 +10,9 @@ use Romanzaycev\Fundamenta\Extensions\Tooolooop;
 
 class Site extends \Romanzaycev\Fundamenta\ModuleBootstrapper
 {
-    public static function afterContainerBuilt(\Slim\App $slim, View $view): void
+    public static function router(\Slim\App $app, View $view): void
     {
-        $slim->get(
+        $app->get(
             "/test",
             function (ServerRequestInterface $request, ResponseInterface $response, array $args) use ($view): ResponseInterface {
                 return $response->withBody($view->renderStream("main.t.php", [

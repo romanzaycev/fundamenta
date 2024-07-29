@@ -3,10 +3,14 @@
 namespace Romanzaycev\Fundamenta\Components\Startup;
 
 use DI\ContainerBuilder;
+use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
+use Slim\App;
 
 /**
- * @method void afterContainerBuilt(mixed ...$args)
+ * @method void afterContainerBuilt(?mixed ...$args)
+ * @method ProvisionDecl[] provisioning(?mixed ...$args)
+ * @method void router(App $app, ?mixed ...$args)
  */
 interface Bootstrapper
 {

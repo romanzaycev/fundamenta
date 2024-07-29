@@ -17,7 +17,7 @@ abstract class ModuleBootstrapper implements Bootstrapper
     public static function boot(ContainerBuilder $builder, Configuration $configuration): void {}
 
     /**
-     * @return array<class-string<ModuleBootstrapper>>
+     * @return array<class-string<Bootstrapper>>
      */
     public static function requires(): array
     {

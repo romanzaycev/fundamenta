@@ -6,7 +6,9 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
+use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Components\Views\EngineManager;
+use Romanzaycev\Fundamenta\Components\Views\ViewEngineProvider;
 use Romanzaycev\Fundamenta\Components\Views\ViewSystem;
 use Romanzaycev\Fundamenta\Components\Views\View;
 use Romanzaycev\Fundamenta\Configuration;
@@ -46,6 +48,22 @@ class Views extends ModuleBootstrapper
             EngineManager::class => get(ViewSystem::class),
             View::class => get(ViewSystem::class),
         ]);
+    }
+
+    public static function provisioning(EngineManager $engineManager): array
+    {
+        return [
+            new ProvisionDecl(
+                ViewEngineProvider::class,
+                function (array $providers) use ($engineManager): void
+                {
+                    foreach ($providers as $provider) {
+                        /** @var ViewEngineProvider $provider */
+                        $provider->register($engineManager);
+                    }
+                }
+            ),
+        ];
     }
 
     public static function requires(): array

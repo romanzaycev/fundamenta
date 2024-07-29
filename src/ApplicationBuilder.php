@@ -7,6 +7,7 @@ use OpenSwoole\Server;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
+use Romanzaycev\Fundamenta\Components\Container\FundamentaContainer;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\OpenSwooleHelper;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
 use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
@@ -83,7 +84,9 @@ class ApplicationBuilder
 
     protected function createContainerBuilder(): ContainerBuilder
     {
-        $containerBuilder = new ContainerBuilder();
+        $containerBuilder = new ContainerBuilder(
+            FundamentaContainer::class,
+        );
         $containerBuilder->useAutowiring(true);
         $containerBuilder->useAttributes(true);
 
@@ -106,7 +109,10 @@ class ApplicationBuilder
         );
     }
 
-    protected function createModulesConfigurator(ContainerBuilder $containerBuilder, Configuration $configuration): ModulesConfigurator
+    protected function createModulesConfigurator(
+        ContainerBuilder $containerBuilder,
+        Configuration $configuration,
+    ): ModulesConfigurator
     {
         return new ModulesConfigurator(
             $configuration,

@@ -6,8 +6,6 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Romanzaycev\Fundamenta\Bootstrappers\Views;
 use Romanzaycev\Fundamenta\Components\Configuration\Env;
-use Romanzaycev\Fundamenta\Components\Views\EngineManager;
-use Romanzaycev\Fundamenta\Components\Views\Exceptions\EngineManagerException;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\Exceptions\Domain\InvalidParamsException;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
@@ -43,28 +41,16 @@ class Bootstrapper extends ModuleBootstrapper
         }
 
         $builder->addDefinitions([
-            Engine::class => static function (Container $container) use ($configuration) {
-                $engine = new Engine(
+            TooolooopViewEngine::class => static function (Container $container) use ($configuration) {
+                $tooolooop = new Engine(
                     directory: $configuration->get("tooolooop.directory")
                 );
-                $engine->setContainer($container);
-                $engine->setContainerFetchingMethod("make");
+                $tooolooop->setContainer($container);
+                $tooolooop->setContainerFetchingMethod("make");
 
-                return $engine;
+                return new TooolooopViewEngine($tooolooop, $configuration);
             },
         ]);
-    }
-
-    /**
-     * @throws EngineManagerException
-     */
-    public static function afterContainerBuilt(EngineManager $engineManager, Engine $tooolooop, Configuration $configuration): void
-    {
-        $engineManager
-            ->register(
-                $configuration->get("tooolooop.extension"),
-                new TooolooopViewEngine($tooolooop, $configuration),
-            );
     }
 
     public static function requires(): array

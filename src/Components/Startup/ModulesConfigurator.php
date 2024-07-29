@@ -4,9 +4,11 @@ namespace Romanzaycev\Fundamenta\Components\Startup;
 
 use DI\Container;
 use DI\ContainerBuilder;
+use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
+use Slim\App;
 
-final class ModulesConfigurator
+class ModulesConfigurator
 {
     private ?array $sorted = null;
 
@@ -14,9 +16,9 @@ final class ModulesConfigurator
      * @param class-string[] $bootstrappers
      */
     public function __construct(
-        private readonly Configuration $configuration,
-        private readonly ContainerBuilder $containerBuilder,
-        private readonly array $bootstrappers,
+        protected readonly Configuration $configuration,
+        protected readonly ContainerBuilder $containerBuilder,
+        protected readonly array $bootstrappers,
     ) {}
 
     /**
@@ -44,18 +46,68 @@ final class ModulesConfigurator
      */
     public function afterContainerBuilt(Container $container): void
     {
-        foreach ($this->getSorted() as $bootstrapper) {
+        $classes = $this->getSorted();
+
+        foreach ($classes as $bootstrapper) {
             if (method_exists($bootstrapper, "afterContainerBuilt")) {
                 $container->call([$bootstrapper, "afterContainerBuilt"]);
+            }
+        }
+
+        /** @var array<class-string, ProvisionDecl[]> $providersMap */
+        $providersMap = [];
+
+        foreach ($classes as $bootstrapper) {
+            if (method_exists($bootstrapper, "provisioning")) {
+                /** @var ProvisionDecl[] $provisionDeclarations */
+                $provisionDeclarations = $container->call([$bootstrapper, "provisioning"]);
+
+                if (!empty($provisionDeclarations)) {
+                    foreach ($provisionDeclarations as $decl) {
+                        $providerInterfaceClass = $decl->providerInterfaceClass;
+                        $providersMap[$providerInterfaceClass] = $providersMap[$providerInterfaceClass] ?? [];
+                        $providersMap[$providerInterfaceClass][] = $decl;
+                    }
+                }
+            }
+        }
+
+        if (!empty($providersMap)) {
+            $providers = array_keys($providersMap);
+            $containerEntries = $container->getKnownEntryNames();
+
+            foreach ($providers as $providerInterfaceClass) {
+                $impls = [];
+
+                foreach ($containerEntries as $containerEntry) {
+                    if (is_subclass_of($containerEntry, $providerInterfaceClass)) {
+                        $impls[] = $container->get($containerEntry);
+                    }
+                }
+
+                if (!empty($impls)) {
+                    foreach ($providersMap[$providerInterfaceClass] as $decl) {
+                        /** @var ProvisionDecl $decl */
+                        call_user_func($decl->acceptor, $impls);
+                    }
+                }
+            }
+        }
+
+        $app = $container->get(App::class);
+
+        foreach ($classes as $bootstrapper) {
+            if (method_exists($bootstrapper, "router")) {
+                $container->call([$bootstrapper, "router"], [$app]);
             }
         }
     }
 
     /**
-     * @return class-string[]
+     * @return class-string<Bootstrapper>[]
      * @throws \Throwable
      */
-    private function getSorted(): array
+    protected final function getSorted(): array
     {
         if ($this->sorted) {
             return $this->sorted;
@@ -99,13 +151,14 @@ final class ModulesConfigurator
         $dg = new DependencyGraph();
 
         foreach ($classes as $class) {
+            /** @var class-string<Bootstrapper> $class */
             $dg->requires($class, call_user_func([$class, "requires"]));
         }
 
         return $dg;
     }
 
-    protected final static function validateBootstrapperClasses(array $classes): void
+    private static function validateBootstrapperClasses(array $classes): void
     {
         foreach ($classes as $class) {
             if (!is_subclass_of($class, Bootstrapper::class)) {
