@@ -47,6 +47,11 @@ class ModulesConfigurator
     public function afterContainerBuilt(Container $container): void
     {
         $classes = $this->getSorted();
+        $hookManager = $container->get(HookManager::class);
+
+        foreach ($classes as $bootstrapper) {
+            $container->call([$bootstrapper, "hooks"], [$hookManager]);
+        }
 
         foreach ($classes as $bootstrapper) {
             if (method_exists($bootstrapper, "afterContainerBuilt")) {
@@ -95,6 +100,25 @@ class ModulesConfigurator
         }
 
         $app = $container->get(App::class);
+        $bootMiddlewares = [];
+
+        foreach ($classes as $bootstrapper) {
+            if (method_exists($bootstrapper, "middlewares")) {
+                $md = $container->call([$bootstrapper, "middlewares"]);
+
+                if (!empty($md)) {
+                    foreach (array_reverse($md) as $m) {
+                        $bootMiddlewares[] = $m;
+                    }
+                }
+            }
+        }
+
+        if (!empty($bootMiddlewares)) {
+            foreach (array_reverse($bootMiddlewares) as $middleware) {
+                $app->add($middleware);
+            }
+        }
 
         foreach ($classes as $bootstrapper) {
             if (method_exists($bootstrapper, "router")) {

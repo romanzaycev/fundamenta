@@ -7,11 +7,12 @@ use OpenSwoole\Server;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
-use Romanzaycev\Fundamenta\Components\Container\FundamentaContainer;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\OpenSwooleHelper;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
 use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
+use Romanzaycev\Fundamenta\Components\Startup\HookManager;
 use Romanzaycev\Fundamenta\Components\Startup\ModulesConfigurator;
+use Romanzaycev\Fundamenta\Components\Startup\ApplicationHookManager;
 use Slim\App;
 use Slim\Factory\AppFactory;
 
@@ -69,10 +70,20 @@ class ApplicationBuilder
 
         $serverFactory = $container->get(ServerFactory::class);
         $server = $serverFactory->createServer();
+        $hookManager = $this->createHookManager($container->get(LoggerInterface::class));
+        $container->set(HookManager::class, $hookManager);
 
-        OpenSwooleHelper::handle($server, function (ServerRequestInterface $request) use ($slimApp) {
-            return $slimApp->handle($request);
-        }, $configuration);
+        OpenSwooleHelper::handle(
+            $server,
+            function (ServerRequestInterface $request) use ($slimApp, $container, $hookManager) {
+                $hookManager->call($container, HookManager::ON_REQUEST, $request);
+                $result = $slimApp->handle($request);
+                $hookManager->call($container, HookManager::ON_REQUEST_TERMINATED);
+
+                return $result;
+            },
+            $configuration,
+        );
 
         $app = $this->createApplication($server);
         $container->set(Application::class, $app);
@@ -84,9 +95,7 @@ class ApplicationBuilder
 
     protected function createContainerBuilder(): ContainerBuilder
     {
-        $containerBuilder = new ContainerBuilder(
-            FundamentaContainer::class,
-        );
+        $containerBuilder = new ContainerBuilder();
         $containerBuilder->useAutowiring(true);
         $containerBuilder->useAttributes(true);
 
@@ -141,6 +150,7 @@ class ApplicationBuilder
             $slimConfig["error_middleware"]["display_error_details"],
             $slimConfig["error_middleware"]["log_errors"],
             $slimConfig["error_middleware"]["log_error_details"],
+            $slimApp->getContainer()->get(LoggerInterface::class),
         );
         $errorMiddleware->setDefaultErrorHandler($errorHandler);
 
@@ -152,5 +162,10 @@ class ApplicationBuilder
     protected function createApplication(Server $server): Application
     {
         return new Application($server);
+    }
+
+    protected function createHookManager(LoggerInterface $logger): HookManager
+    {
+        return new ApplicationHookManager($logger);
     }
 }

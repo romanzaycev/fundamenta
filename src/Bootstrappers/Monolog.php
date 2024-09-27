@@ -9,6 +9,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Romanzaycev\Fundamenta\Components\Configuration\Env;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
 
@@ -41,7 +42,7 @@ class Monolog extends ModuleBootstrapper
 
                 $defaultHandler = new StreamHandler(
                     $configuration->get("monolog.stream", 'php://stdout'),
-                    $_ENV["IS_DEBUG"]
+                    Env::getBool("IS_DEBUG", false)
                         ? $configuration->get("monolog.debug_level", LogLevel::DEBUG)
                         : $configuration->get("monolog.level", LogLevel::NOTICE),
                 );

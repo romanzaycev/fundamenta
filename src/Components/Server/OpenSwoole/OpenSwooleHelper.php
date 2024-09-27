@@ -19,13 +19,13 @@ final class OpenSwooleHelper
             $emptyNotFoundResponse = new Response(404);
 
             if ($ignoreFavicon && $request->getMethod() === "GET" && $request->server["request_uri"] === "/favicon.ico") {
-                \OpenSwoole\Core\Psr\Response::emit($response, $emptyNotFoundResponse);
+                SwoolePsrResponseHelper::emit($response, $emptyNotFoundResponse);
                 return;
             }
 
             $serverRequest = self::from($request);
             $serverResponse = $callback($serverRequest);
-            \OpenSwoole\Core\Psr\Response::emit($response, $serverResponse);
+            SwoolePsrResponseHelper::emit($response, $serverResponse);
         });
     }
 

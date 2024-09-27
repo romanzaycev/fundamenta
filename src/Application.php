@@ -3,12 +3,11 @@
 namespace Romanzaycev\Fundamenta;
 
 use OpenSwoole\Server;
-use Slim\App;
 
-class Application
+readonly class Application
 {
     public function __construct(
-        private readonly Server $server,
+        private Server $server,
     ) {}
 
     public function start(): void

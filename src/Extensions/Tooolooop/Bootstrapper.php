@@ -42,8 +42,10 @@ class Bootstrapper extends ModuleBootstrapper
 
         $builder->addDefinitions([
             TooolooopViewEngine::class => static function (Container $container) use ($configuration) {
+                $config = $configuration->get("tooolooop");
                 $tooolooop = new Engine(
-                    directory: $configuration->get("tooolooop.directory")
+                    directory: $config["directory"],
+                    extension: $config["extension"],
                 );
                 $tooolooop->setContainer($container);
                 $tooolooop->setContainerFetchingMethod("make");

@@ -3,6 +3,7 @@
 namespace Romanzaycev\Fundamenta\Components\Startup;
 
 use DI\ContainerBuilder;
+use Psr\Http\Server\MiddlewareInterface;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
 use Slim\App;
@@ -11,6 +12,7 @@ use Slim\App;
  * @method void afterContainerBuilt(?mixed ...$args)
  * @method ProvisionDecl[] provisioning(?mixed ...$args)
  * @method void router(App $app, ?mixed ...$args)
+ * @method array<string|callable|MiddlewareInterface> middlewares(?mixed ...$args)
  */
 interface Bootstrapper
 {

@@ -4,6 +4,7 @@ namespace Romanzaycev\Fundamenta;
 
 use DI\ContainerBuilder;
 use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
+use Romanzaycev\Fundamenta\Components\Startup\HookManager;
 
 abstract class ModuleBootstrapper implements Bootstrapper
 {
@@ -15,6 +16,8 @@ abstract class ModuleBootstrapper implements Bootstrapper
     public static function preconfigure(Configuration $configuration): void {}
 
     public static function boot(ContainerBuilder $builder, Configuration $configuration): void {}
+
+    public static function hooks(HookManager $hookManager): void {}
 
     /**
      * @return array<class-string<Bootstrapper>>

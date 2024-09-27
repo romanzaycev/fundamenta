@@ -3,6 +3,7 @@
 namespace Romanzaycev\Fundamenta\Components\Http;
 
 use Nyholm\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 
 final class HttpHelper
 {
@@ -18,5 +19,17 @@ final class HttpHelper
             ],
             json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
         );
+    }
+
+    public static function redirect(string $location, int $status = 302, ?ResponseInterface $response = null): Response
+    {
+        if (!$response) {
+            $response = new Response($status);
+        }
+
+        return $response
+            ->withAddedHeader("Location", $location)
+            ->withStatus($status)
+        ;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Romanzaycev\Fundamenta\Bootstrappers;
 
-use Romanzaycev\Fundamenta\Components\Configuration\Env;
 use Romanzaycev\Fundamenta\Components\Server\Slim\HttpErrorHandler;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
@@ -21,7 +20,6 @@ class Slim extends ModuleBootstrapper
                     "log_error_details" => false,
                 ],
                 "middlewares" => [],
-                "is_debug" => Env::getBool("IS_DEBUG", false),
             ],
             [
                 "error_handler",
