@@ -21,7 +21,11 @@ final class HttpHelper
         );
     }
 
-    public static function redirect(string $location, int $status = 302, ?ResponseInterface $response = null): Response
+    public static function redirect(
+        string $location,
+        int $status = 302,
+        ?ResponseInterface $response = null,
+    ): ResponseInterface
     {
         if (!$response) {
             $response = new Response($status);
