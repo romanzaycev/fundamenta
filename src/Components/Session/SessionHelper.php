@@ -9,6 +9,6 @@ final class SessionHelper
 {
     public static function getSession(ServerRequestInterface $request): SessionInterface
     {
-        return $request->getAttribute(FundamentaSessionMiddleware::SESSION_ATTRIBUTE);
+        return $request->getAttribute(FndaSessionMiddleware::SESSION_ATTRIBUTE);
     }
 }

@@ -11,7 +11,7 @@ use PSR7Sessions\Storageless\Http\ClientFingerprint\RemoteAddr;
 use PSR7Sessions\Storageless\Http\ClientFingerprint\UserAgent;
 use PSR7Sessions\Storageless\Http\Configuration as StoragelessConfig;
 use PSR7Sessions\Storageless\Http\ClientFingerprint\Configuration as FingerprintConfig;
-use Romanzaycev\Fundamenta\Components\Session\FundamentaSessionMiddleware;
+use Romanzaycev\Fundamenta\Components\Session\FndaSessionMiddleware;
 use Romanzaycev\Fundamenta\Components\Startup\HookManager;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\Exceptions\Domain\InvalidParamsException;
@@ -103,7 +103,7 @@ class Session extends ModuleBootstrapper
             }
         }
 
-        return [new FundamentaSessionMiddleware(
+        return [new FndaSessionMiddleware(
             $config,
             $container->get(HookManager::class),
             $container,

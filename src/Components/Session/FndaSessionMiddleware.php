@@ -28,7 +28,7 @@ use stdClass;
 
 use function sprintf;
 
-final class FundamentaSessionMiddleware implements MiddlewareInterface
+final class FndaSessionMiddleware implements MiddlewareInterface
 {
     public const SESSION_CLAIM = 'session-data';
     public const SESSION_ATTRIBUTE = 'session';
