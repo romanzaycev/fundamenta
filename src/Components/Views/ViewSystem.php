@@ -92,7 +92,7 @@ class ViewSystem implements View, EngineManager
                         $this
                             ->logger
                             ->notice(sprintf(
-                                "[EngineManager] Rendering without cache key, template \"%s\", skipped",
+                                "[ViewSystem] Rendering without cache key, template \"%s\", skipped",
                                 $templatePath,
                             ));
 

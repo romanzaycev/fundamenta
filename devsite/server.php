@@ -4,6 +4,9 @@ use Romanzaycev\Devsite\Site;
 use Romanzaycev\Fundamenta\ApplicationBuilder;
 use Romanzaycev\Fundamenta\Components\Auth\Session\SessionTokenStorage;
 use Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader;
+use Cycle\Database\Config as DbConfig;
+use Romanzaycev\Fundamenta\Components\Configuration\Env;
+use Romanzaycev\Fundamenta\Components\Configuration\LazyValue;
 
 require dirname(__DIR__) . "/vendor/autoload.php";
 
@@ -27,6 +30,27 @@ require dirname(__DIR__) . "/vendor/autoload.php";
             "auth" => [
                 "enabled" => true,
                 "storage" => SessionTokenStorage::class,
+            ],
+            "dbal" => [
+                "databases" => [
+                    "default" => [
+                        "connection" => "pgsql",
+                    ],
+                ],
+                "connections" => new LazyValue(static fn () => [
+                    "pgsql" => new DbConfig\PostgresDriverConfig(
+                        connection: new DbConfig\Postgres\DsnConnectionConfig(
+                            sprintf(
+                                "pgsql:host=localhost;port=%d;dbname=%s",
+                                Env::getInt("PG_PORT", 0),
+                                Env::getString("PG_DB", ""),
+                            ),
+                            Env::getString("PG_USER", ""),
+                            Env::getString("PG_PASSWORD", ""),
+                        ),
+                        queryCache: true,
+                    ),
+                ]),
             ],
         ]),
         [

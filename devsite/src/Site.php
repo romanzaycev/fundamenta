@@ -4,6 +4,7 @@ namespace Romanzaycev\Devsite;
 
 use DI\ContainerBuilder;
 use Romanzaycev\Fundamenta\Bootstrappers\Auth;
+use Romanzaycev\Fundamenta\Bootstrappers\Eav;
 use Romanzaycev\Fundamenta\Bootstrappers\Slim;
 use Romanzaycev\Fundamenta\Components\Auth\Session\SessionTokenStorageProvider;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\UniversalTransportProvider;
@@ -35,6 +36,7 @@ class Site extends \Romanzaycev\Fundamenta\ModuleBootstrapper
     public static function requires(): array
     {
         return [
+            Eav::class,
             Auth::class,
             Slim::class,
             Tooolooop\Bootstrapper::class,

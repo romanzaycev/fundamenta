@@ -44,7 +44,7 @@ class ApplicationBuilder
     public function build(): Application
     {
         $containerBuilder = $this->createContainerBuilder();
-        $configuration = $this->createContainerConfiguration();
+        $configuration = $this->createConfiguration();
 
         $modulesConfigurator = $this->createModulesConfigurator(
             $containerBuilder,
@@ -102,7 +102,7 @@ class ApplicationBuilder
         return $containerBuilder;
     }
 
-    protected function createContainerConfiguration(): Configuration
+    protected function createConfiguration(): Configuration
     {
         return new Configuration(
             $this->configurationLoader,

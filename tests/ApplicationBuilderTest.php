@@ -89,6 +89,7 @@ class ApplicationBuilderTest extends TestCase
      */
     public function testBuildSuccessfullyCreatesApplication(): void
     {
+        // @phpstan-ignore-next-line
         $this
             ->configurationLoader
             ->shouldReceive("load")

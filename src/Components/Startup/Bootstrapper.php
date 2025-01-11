@@ -13,6 +13,7 @@ use Slim\App;
  * @method ProvisionDecl[] provisioning(?mixed ...$args)
  * @method void router(App $app, ?mixed ...$args)
  * @method array<string|callable|MiddlewareInterface> middlewares(?mixed ...$args)
+ * @method void booted(?mixed ...$args)
  */
 interface Bootstrapper
 {

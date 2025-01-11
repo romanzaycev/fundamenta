@@ -54,6 +54,7 @@
     "romanzaycev/tooolooop": "^0.5",
     "slim/slim": "^4.14",
     "symfony/cache": "^6.2",
+    "symfony/event-dispatcher": "^7.2",
     "vlucas/phpdotenv": "^5.5",
     "vlucas/valitron": "^1.4"
   },

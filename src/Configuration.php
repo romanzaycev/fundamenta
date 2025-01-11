@@ -3,6 +3,7 @@
 namespace Romanzaycev\Fundamenta;
 
 use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
+use Romanzaycev\Fundamenta\Components\Configuration\LazyValue;
 
 class Configuration
 {
@@ -45,8 +46,8 @@ class Configuration
 
         if ($path === self::ALL) {
             return array_replace_recursive(
-                $this->defaults,
-                $this->sections,
+                $this->apply($this->defaults),
+                $this->apply($this->sections),
             );
         }
 
@@ -82,7 +83,7 @@ class Configuration
         }
 
         $this->sections = array_replace_recursive(
-            $this->initial,
+            $this->apply($this->initial),
             $this->loader->load(),
         );
         $e = [];
@@ -128,8 +129,20 @@ class Configuration
         }
     }
 
+    protected function apply(array $in): array
+    {
+        array_walk_recursive($in, static function (&$item) {
+            if ($item instanceof LazyValue) {
+                $item = $item->resolve();
+            }
+        });
+
+        return $in;
+    }
+
     protected final function getInternal(array $sectionData, string|array $path, mixed $default): mixed
     {
+        $sectionData = $this->apply($sectionData);
         $pathItems = is_array($path) ? $path : explode(".", $path);
         $previous = $sectionData;
 

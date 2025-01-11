@@ -6,6 +6,7 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
+use Romanzaycev\Fundamenta\ModuleBootstrapper;
 use Slim\App;
 
 class ModulesConfigurator
@@ -13,7 +14,7 @@ class ModulesConfigurator
     private ?array $sorted = null;
 
     /**
-     * @param class-string[] $bootstrappers
+     * @param class-string<ModuleBootstrapper>[] $bootstrappers
      */
     public function __construct(
         protected readonly Configuration $configuration,
@@ -123,6 +124,12 @@ class ModulesConfigurator
         foreach ($classes as $bootstrapper) {
             if (method_exists($bootstrapper, "router")) {
                 $container->call([$bootstrapper, "router"], [$app]);
+            }
+        }
+
+        foreach ($classes as $bootstrapper) {
+            if (method_exists($bootstrapper, "booted")) {
+                $container->call([$bootstrapper, "booted"]);
             }
         }
     }

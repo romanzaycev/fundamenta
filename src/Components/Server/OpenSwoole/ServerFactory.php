@@ -69,7 +69,7 @@ class ServerFactory
                     ->logger
                     ->info(
                         sprintf(
-                            "Server started on %s:%s",
+                            "[ServerFactory] Server started on %s:%s",
                             $server->host,
                             $server->port,
                         ),
