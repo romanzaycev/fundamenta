@@ -12,21 +12,41 @@ use Romanzaycev\Fundamenta\Configuration;
 
 final class OpenSwooleHelper
 {
-    public static function handle(Server $server, callable $callback, Configuration $configuration): void
+    public static function handle(
+        Server $server,
+        callable $callback,
+        Configuration $configuration,
+        SwooleStaticHandler $staticHandler,
+    ): void
     {
         $ignoreFavicon = $configuration->get("openswoole.misc.ignore_favicon", true);
-        $server->on("request", function (\OpenSwoole\HTTP\Request $request, \OpenSwoole\HTTP\Response $response) use (&$callback, $ignoreFavicon) {
-            $emptyNotFoundResponse = new Response(404);
+        $server->on(
+            "request",
+            function (
+                \OpenSwoole\HTTP\Request $request,
+                \OpenSwoole\HTTP\Response $response,
+            ) use (
+                &$callback,
+                $ignoreFavicon,
+                $staticHandler,
+            ) {
+                $isGetMethod = $request->getMethod() === "GET";
+                $requestPath = $request->server["request_uri"];
 
-            if ($ignoreFavicon && $request->getMethod() === "GET" && $request->server["request_uri"] === "/favicon.ico") {
-                SwoolePsrResponseHelper::emit($response, $emptyNotFoundResponse);
-                return;
+                if ($ignoreFavicon && $isGetMethod && $requestPath === "/favicon.ico") {
+                    SwoolePsrResponseHelper::emit($response, new Response(404));
+                    return;
+                }
+
+                if ($isGetMethod && $staticHandler->tryRespond($requestPath, $response)) {
+                    return;
+                }
+
+                $serverRequest = self::from($request);
+                $serverResponse = $callback($serverRequest);
+                SwoolePsrResponseHelper::emit($response, $serverResponse);
             }
-
-            $serverRequest = self::from($request);
-            $serverResponse = $callback($serverRequest);
-            SwoolePsrResponseHelper::emit($response, $serverResponse);
-        });
+        );
     }
 
     private static function from(\OpenSwoole\HTTP\Request $request): ServerRequestInterface

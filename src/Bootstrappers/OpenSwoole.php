@@ -6,9 +6,13 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Configuration\Env;
+use Romanzaycev\Fundamenta\Components\Http\Static\StaticHandler;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\SwooleStaticHandler;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
+use function DI\autowire;
+use function DI\get;
 
 class OpenSwoole extends ModuleBootstrapper
 {
@@ -26,6 +30,7 @@ class OpenSwoole extends ModuleBootstrapper
                     "enable_static_handler" => true,
                     "http_index_files" => [
                         "index.html",
+                        "index.htm",
                     ],
                 ],
                 "misc" => [
@@ -55,6 +60,8 @@ class OpenSwoole extends ModuleBootstrapper
                     $container->get(LoggerInterface::class),
                 );
             },
+            StaticHandler::class => autowire(SwooleStaticHandler::class),
+            SwooleStaticHandler::class => get(StaticHandler::class),
         ]);
     }
 

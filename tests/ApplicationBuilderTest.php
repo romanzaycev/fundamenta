@@ -10,6 +10,7 @@ use Romanzaycev\Fundamenta\Application;
 use Romanzaycev\Fundamenta\ApplicationBuilder;
 use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\SwooleStaticHandler;
 use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
 use Romanzaycev\Fundamenta\Tests\Stubs\StubErrorHandler;
 use Romanzaycev\Fundamenta\Tests\Stubs\TestBootstrapper;
@@ -115,6 +116,9 @@ class ApplicationBuilderTest extends TestCase
             LoggerInterface::class => \DI\create(NullLogger::class),
             ServerFactory::class => function () {
                 return $this->swooleServerFactory;
+            },
+            SwooleStaticHandler::class => function () {
+                return \Mockery::mock(SwooleStaticHandler::class);
             },
         ]);
 
