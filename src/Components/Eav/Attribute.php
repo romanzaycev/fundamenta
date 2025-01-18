@@ -6,7 +6,7 @@ readonly class Attribute
 {
     public function __construct(
         public int $id,
-        public int $entityId,
+        public int $typeId,
         public string $code,
         public AttributeType $type,
         public \DateTimeInterface $createdAt,

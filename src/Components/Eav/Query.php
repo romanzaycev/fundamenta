@@ -20,7 +20,7 @@ class Query
     protected array $order = [];
 
     public function __construct(
-        protected readonly string $entityType,
+        protected readonly string $entityTypeCode,
     ) {}
 
     public function select(string ...$attribute): self
@@ -103,9 +103,9 @@ class Query
         return $this;
     }
 
-    public function getEntityType(): string
+    public function getEntityTypeCode(): string
     {
-        return $this->entityType;
+        return $this->entityTypeCode;
     }
 
     /**
@@ -129,5 +129,13 @@ class Query
     public function getOffset(): ?int
     {
         return $this->offset;
+    }
+
+    /**
+     * @return array<string, Order>
+     */
+    public function getOrder(): array
+    {
+        return $this->order;
     }
 }

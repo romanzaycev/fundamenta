@@ -3,16 +3,16 @@
 namespace Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql\Repositories;
 
 use Cycle\Database\DatabaseInterface;
-use Romanzaycev\Fundamenta\Components\Eav\Entity;
-use Romanzaycev\Fundamenta\Components\Eav\Events\EntityCreated;
-use Romanzaycev\Fundamenta\Components\Eav\Events\EntityDeleted;
+use Romanzaycev\Fundamenta\Components\Eav\Events\TypeCreated;
+use Romanzaycev\Fundamenta\Components\Eav\Events\TypeDeleted;
 use Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql\Repositories\Helpers\PgsqlDateHelper;
-use Romanzaycev\Fundamenta\Components\Eav\Repositories\EntityRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\SchemaInitializerInterface;
+use Romanzaycev\Fundamenta\Components\Eav\Repositories\TypeRepositoryInterface;
+use Romanzaycev\Fundamenta\Components\Eav\Type;
 use Romanzaycev\Fundamenta\Configuration;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-readonly class PgsqlEntityRepository implements EntityRepositoryInterface
+readonly class PgsqlTypeRepository implements TypeRepositoryInterface
 {
     private string $table;
 
@@ -23,30 +23,38 @@ readonly class PgsqlEntityRepository implements EntityRepositoryInterface
         private EventDispatcherInterface $eventDispatcher,
     )
     {
-        $this->table = $this->configuration->get("eav.schema.tables.entity");
+        $this->table = $this->configuration->get("eav.schema.tables.type");
     }
 
-    public function create(int $typeId): Entity
+    public function create(string $code): Type
     {
+        if (mb_strlen($code) > 100) {
+            throw new \InvalidArgumentException();
+        }
+
         $this->schemaInitializer->initialize();
         $stmt = $this
             ->database
             ->query(
-                /** @lang PostgreSQL */"INSERT INTO $this->table (type_id) VALUES (:type_id) RETURNING *",
-                ["type_id" => $typeId],
+                /** @lang PostgreSQL */"
+                    INSERT INTO $this->table (code) VALUES (:code)
+                    ON CONFLICT (code) DO UPDATE SET code = EXCLUDED.code
+                    RETURNING *
+                ",
+                ["code" => $code],
             );
-        $entity = $this->map($stmt->fetch());
+        $type = $this->map($stmt->fetch());
         $this
             ->eventDispatcher
             ->dispatch(
-                new EntityCreated($entity),
-                EntityCreated::EVENT,
+                new TypeCreated($type),
+                TypeCreated::EVENT,
             );
 
-        return $entity;
+        return $type;
     }
 
-    public function findById(int $id): ?Entity
+    public function findById(int $id): ?Type
     {
         $this->schemaInitializer->initialize();
         $stmt = $this
@@ -54,6 +62,23 @@ readonly class PgsqlEntityRepository implements EntityRepositoryInterface
             ->query(
                 /** @lang PostgreSQL */"SELECT * FROM $this->table WHERE id = :id LIMIT 1",
                 ["id" => $id],
+            );
+
+        if ($data = $stmt->fetch()) {
+            return $this->map($data);
+        }
+
+        return null;
+    }
+
+    public function findByCode(string $code): ?Type
+    {
+        $this->schemaInitializer->initialize();
+        $stmt = $this
+            ->database
+            ->query(
+            /** @lang PostgreSQL */"SELECT * FROM $this->table WHERE code = :code LIMIT 1",
+                ["code" => $code],
             );
 
         if ($data = $stmt->fetch()) {
@@ -75,16 +100,16 @@ readonly class PgsqlEntityRepository implements EntityRepositoryInterface
         $this
             ->eventDispatcher
             ->dispatch(
-                new EntityDeleted($id),
-                EntityDeleted::EVENT,
+                new TypeDeleted($id),
+                TypeDeleted::EVENT,
             );
     }
 
-    protected function map(array $row): Entity
+    protected function map(array $row): Type
     {
-        return new Entity(
+        return new Type(
             (int)$row["id"],
-            (int)$row["type_id"],
+            $row["code"],
             PgsqlDateHelper::toNative($row["created_at"]),
             PgsqlDateHelper::toNative($row["updated_at"]),
         );

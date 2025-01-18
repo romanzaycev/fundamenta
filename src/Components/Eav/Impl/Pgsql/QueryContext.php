@@ -2,6 +2,7 @@
 
 namespace Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql;
 
+use Romanzaycev\Fundamenta\Components\Eav\AttributeHelper;
 use Romanzaycev\Fundamenta\Components\Eav\Operator;
 
 class QueryContext
@@ -12,14 +13,19 @@ class QueryContext
     /** @var string[] */
     private array $attributesCodes = [];
 
-    public function getAttributesCodes(): ?array
+    /**
+     * @return string[]|null
+     */
+    public function getSelectedAttributesCodes(): ?array
     {
-        return !empty($this->attributesCodes) ? array_values($this->attributesCodes) : null;
+        return !empty($this->attributesCodes)
+            ? array_values(array_unique($this->attributesCodes))
+            : null;
     }
 
-    public function addAttributeCode(string $code): void
+    public function addSelectedAttributesCode(string $code): void
     {
-        if ($code === "id") {
+        if (AttributeHelper::isEntityOwned($code)) {
             return;
         }
 

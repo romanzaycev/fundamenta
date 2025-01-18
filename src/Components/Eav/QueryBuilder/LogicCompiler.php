@@ -2,6 +2,7 @@
 
 namespace Romanzaycev\Fundamenta\Components\Eav\QueryBuilder;
 
+use Romanzaycev\Fundamenta\Components\Eav\InternalLogicOps;
 use Romanzaycev\Fundamenta\Components\Eav\Logic;
 use Romanzaycev\Fundamenta\Components\Eav\Operator;
 
@@ -19,16 +20,16 @@ readonly class LogicCompiler
     protected function compileNode(Logic $node, ?string $field = null): array
     {
         switch ($node->getOp()) {
-            case Logic::OP_OR:
+            case InternalLogicOps::OP_OR:
                 $result = $this->createEmptySetNode($node->getOp());
 
-                if (str_starts_with($field, "__single-or_")) {
+                if (str_starts_with($field, InternalLogicOps::SINGLE_OR_PFX)) {
                     return $this->iterateWhere($node, $result);
                 } else {
                     return $this->iterateWhere($node, $result, $field);
                 }
 
-            case Logic::OP_AND:
+            case InternalLogicOps::OP_AND:
                 return $this->iterateWhere(
                     $node,
                     $this->createEmptySetNode($node->getOp()),

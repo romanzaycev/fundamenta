@@ -10,7 +10,15 @@ class DebugMerger implements LogicMerger
 
     protected function visit(array &$parts, string $field, Operator $op, mixed $value): void
     {
-        $strOp = $op->value;
+        $strOp = null;
+
+        if ($value === null && in_array($op, [Operator::IS, Operator::IS_NOT])) {
+            $strOp = $op->value . " NULL";
+        }
+
+        if ($strOp === null) {
+            $strOp = $op->value;
+        }
 
         if ($op === Operator::IN && is_array($value)) {
             $inValues = array_map(function($val) {

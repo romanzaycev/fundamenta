@@ -2,16 +2,23 @@
 
 namespace Romanzaycev\Fundamenta\Components\Eav\QueryBuilder;
 
-use Romanzaycev\Fundamenta\Components\Eav\Logic;
+use Romanzaycev\Fundamenta\Components\Eav\Exceptions\QueryException;
+use Romanzaycev\Fundamenta\Components\Eav\InternalLogicOps;
 use Romanzaycev\Fundamenta\Components\Eav\Operator;
 
 trait GenericMerger
 {
+    /**
+     * @throws QueryException
+     */
     public function merge(array $compiledNodes): string
     {
         return $this->iterateCompiledNodes($compiledNodes);
     }
 
+    /**
+     * @throws QueryException
+     */
     protected function iterateCompiledNodes(array $conditions): string
     {
         if (empty($conditions)) {
@@ -20,7 +27,7 @@ trait GenericMerger
 
         $operator = strtoupper(array_shift($conditions));
 
-        if (!in_array($operator, [Logic::OP_AND, Logic::OP_OR])) {
+        if (!in_array($operator, [InternalLogicOps::OP_AND, InternalLogicOps::OP_OR])) {
             throw new \InvalidArgumentException("Invalid logical operator: $operator");
         }
 
@@ -33,7 +40,7 @@ trait GenericMerger
 
             $firstElement = strtoupper($condition[0]);
 
-            if (in_array($firstElement, [Logic::OP_AND, Logic::OP_OR])) {
+            if (in_array($firstElement, [InternalLogicOps::OP_AND, InternalLogicOps::OP_OR])) {
                 $nestedCondition = $this->iterateCompiledNodes($condition);
                 $parts[] = "($nestedCondition)";
             } else {

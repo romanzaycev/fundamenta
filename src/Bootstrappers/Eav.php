@@ -8,6 +8,7 @@ use Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql as PgsqlImpl;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\AttributeRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\EntityRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\SchemaInitializerInterface;
+use Romanzaycev\Fundamenta\Components\Eav\Repositories\TypeRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\ValueRepositoryInterface;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
@@ -23,6 +24,7 @@ class Eav extends ModuleBootstrapper
                 "schema" => [
                     "pg_schema" => "public",
                     "tables" => [
+                        "type" => "eav_types",
                         "entity" => "eav_entities",
                         "attribute" => "eav_attributes",
                         "value" => "eav_values",
@@ -32,6 +34,7 @@ class Eav extends ModuleBootstrapper
             [
                 "schema",
                 "schema.tables",
+                "schema.tables.type",
                 "schema.tables.entity",
                 "schema.tables.attribute",
                 "schema.tables.value",
@@ -43,6 +46,7 @@ class Eav extends ModuleBootstrapper
     {
         $builder->addDefinitions([
             SchemaInitializerInterface::class => autowire(PgsqlImpl\Repositories\PgsqlSchemaInitializer::class),
+            TypeRepositoryInterface::class => autowire(PgsqlImpl\Repositories\PgsqlTypeRepository::class),
             EntityRepositoryInterface::class =>  autowire(PgsqlImpl\Repositories\PgsqlEntityRepository::class),
             AttributeRepositoryInterface::class => autowire(PgsqlImpl\Repositories\PgsqlAttributeRepository::class),
             ValueRepositoryInterface::class => autowire(PgsqlImpl\Repositories\PgsqlValueRepository::class),

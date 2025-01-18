@@ -8,13 +8,13 @@ use Romanzaycev\Fundamenta\Components\Eav\AttributeType;
 interface AttributeRepositoryInterface
 {
     public function create(
-        int $entityId,
+        int $typeId,
         string $code,
         AttributeType $type,
     ): Attribute;
 
-    public function findByName(
-        int $entityId,
+    public function findByCode(
+        int $typeId,
         string $code,
     ): ?Attribute;
 
@@ -25,10 +25,10 @@ interface AttributeRepositoryInterface
     /**
      * @return Attribute[]
      */
-    public function getList(int $entityId): array;
+    public function getList(int $typeId): array;
 
     /**
      * @return Attribute[]
      */
-    public function getListByEntityType(string $entityType): array;
+    public function getListByEntityTypeCode(string $entityTypeCode): array;
 }

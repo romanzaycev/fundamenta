@@ -2,13 +2,12 @@
 
 namespace Romanzaycev\Fundamenta\Components\Eav;
 
-readonly class Entity
+readonly class Type
 {
     public function __construct(
         public int $id,
-        public int $typeId,
+        public string $code,
         public \DateTimeInterface $createdAt,
         public \DateTimeInterface $updatedAt,
     ) {}
 }
-

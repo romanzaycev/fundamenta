@@ -25,25 +25,21 @@ class Merger implements LogicMerger
         $this->isSelected = $this->isSomeSelected();
     }
 
-    /**
-     * @throws QueryException
-     */
     public function finalize(): void
     {
-        $entityType = $this->query->getEntityType();
         $selected = $this->query->getSelected();
+        $ordered = array_keys($this->query->getOrder());
+        $interests = [...$selected, ...$ordered];
 
-        if (!empty($selected)) {
-            foreach ($selected as $code) {
-                if (AttributeHelper::isDeniedCode($code)) {
+        if (!empty($interests)) {
+            foreach ($interests as $code) {
+                if (AttributeHelper::isEntityOwned($code)) {
                     continue;
                 }
 
-                if (!$this->materializer->isKnownAttribute($entityType, $code)) {
-                    throw new QueryException("Unknown attribute \"$code\"");
+                if ($this->materializer->isKnownAttribute($this->query->getEntityTypeCode(), $code)) {
+                    $this->context->addSelectedAttributesCode($code);
                 }
-
-                $this->context->addAttributeCode($code);
             }
         }
     }
@@ -79,7 +75,7 @@ class Merger implements LogicMerger
             $attribute = $this
                 ->materializer
                 ->getAttribute(
-                    $this->query->getEntityType(),
+                    $this->query->getEntityTypeCode(),
                     $field,
                 );
 
@@ -87,7 +83,7 @@ class Merger implements LogicMerger
                 $valueColumn = "notval";
             } else {
                 if ($this->isSelected) {
-                    $this->context->addAttributeCode($field);
+                    $this->context->addSelectedAttributesCode($field);
                 }
 
                 $valueColumn = match ($attribute->type) {
@@ -118,7 +114,7 @@ class Merger implements LogicMerger
 
         if (!empty($selected)) {
             foreach ($selected as $code) {
-                if (AttributeHelper::isDeniedCode($code)) {
+                if (AttributeHelper::isEntityOwned($code)) {
                     continue;
                 }
 

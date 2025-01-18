@@ -10,9 +10,6 @@ use Romanzaycev\Fundamenta\Components\Eav\QueryBuilder\LogicCompiler;
  */
 readonly class Logic
 {
-    public const OP_AND = "AND";
-    public const OP_OR = "OR";
-
     public function __construct(
         private string $op,
         private array $where,
@@ -37,7 +34,7 @@ readonly class Logic
 
         foreach ($where as $k => $v) {
             if ($v instanceof Logic) {
-                if ($v->getOp() === self::OP_AND) {
+                if ($v->getOp() === InternalLogicOps::OP_AND) {
                     foreach ($v->getWhere() as $kk => $vv) {
                         $additional[$kk] = $vv;
                     }
@@ -45,8 +42,8 @@ readonly class Logic
                     continue;
                 }
 
-                if ($v->getOp() === self::OP_OR && !is_string($k)) {
-                    $additional["__single-or_" . mt_rand()] = $v;
+                if ($v->getOp() === InternalLogicOps::OP_OR && !is_string($k)) {
+                    $additional[InternalLogicOps::SINGLE_OR_PFX . mt_rand()] = $v;
                     unset($where[$k]);
                     continue;
                 }
@@ -60,7 +57,7 @@ readonly class Logic
         }
 
         return new self(
-            self::OP_AND,
+            InternalLogicOps::OP_AND,
             array_merge($where, $additional),
         );
     }
@@ -70,7 +67,7 @@ readonly class Logic
      */
     public static function or(array $where): self
     {
-        return new self(self::OP_OR, $where);
+        return new self(InternalLogicOps::OP_OR, $where);
     }
 
     public function debug(): string

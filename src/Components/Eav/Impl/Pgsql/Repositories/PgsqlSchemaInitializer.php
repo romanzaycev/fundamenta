@@ -10,6 +10,7 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
 {
     private bool $initialized = false;
     private readonly string $schema;
+    private readonly string $typesTable;
     private readonly string $entitiesTable;
     private readonly string $attributesTable;
     private readonly string $valuesTable;
@@ -21,6 +22,7 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
     {
         $config = $this->configuration->get("eav.schema");
         $this->schema = $config["pg_schema"];
+        $this->typesTable = $config["tables"]["type"];
         $this->entitiesTable = $config["tables"]["entity"];
         $this->attributesTable = $config["tables"]["attribute"];
         $this->valuesTable = $config["tables"]["value"];
@@ -30,6 +32,10 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
     {
         if ($this->initialized) {
             return;
+        }
+
+        if (!$this->isTableExists($this->typesTable)) {
+            $this->creatTypesTable();
         }
 
         if (!$this->isTableExists($this->entitiesTable)) {
@@ -62,38 +68,55 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
         return $result === "true" || $result === true;
     }
 
-    private function creatEntitiesTable(): void
+    private function creatTypesTable(): void
     {
-        $t = $this->entitiesTable;
+        $t = $this->typesTable;
         $this->execute([
             /** @lang PostgreSQL */"
             CREATE TABLE $t (
                 id SERIAL PRIMARY KEY,
-                type VARCHAR(100) NOT NULL,
+                code VARCHAR(100) NOT NULL,
                 created_at TIMESTAMP DEFAULT NOW(),
                 updated_at TIMESTAMP DEFAULT NOW()
             );",
-            "CREATE INDEX idx_entities_type ON $t(type);",
+            "CREATE UNIQUE INDEX uq_eav_type_code ON $t(code);",
+        ]);
+    }
+
+    private function creatEntitiesTable(): void
+    {
+        $t = $this->entitiesTable;
+        $tt = $this->typesTable;
+        $this->execute([
+            /** @lang PostgreSQL */"
+            CREATE TABLE $t (
+                id SERIAL PRIMARY KEY,
+                type_id INTEGER NOT NULL REFERENCES $tt(id) ON DELETE CASCADE,
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW()
+            );",
+            "CREATE INDEX idx_eav_entities_type ON $t(type_id);",
         ]);
     }
 
     private function creatAttributesTable(): void
     {
         $t = $this->attributesTable;
-        $et = $this->entitiesTable;
+        $tt = $this->typesTable;
         $this->execute([
             /** @lang PostgreSQL */"
             CREATE TABLE $t (
                 id SERIAL PRIMARY KEY,
-                entity_id INTEGER NOT NULL REFERENCES $et(id) ON DELETE CASCADE,
+                type_id INTEGER NOT NULL REFERENCES $tt(id) ON DELETE CASCADE,
                 code VARCHAR(100) NOT NULL,
                 data_type VARCHAR(50) NOT NULL,
                 created_at TIMESTAMP DEFAULT NOW(),
                 updated_at TIMESTAMP DEFAULT NOW()
             );",
-            "CREATE UNIQUE INDEX uq_attributes_code ON $t(entity_id, code);",
-            "CREATE INDEX idx_attributes_data_type ON $t(data_type);",
-            "CREATE INDEX idx_attributes_entity_id ON $t(entity_id);",
+            "CREATE UNIQUE INDEX uq_eav_attributes_type_id_code ON $t(type_id, code);",
+            "CREATE INDEX idx_eav_attributes_data_type ON $t(data_type);",
+            "CREATE INDEX idx_eav_attributes_type_id ON $t(type_id);",
+            "CREATE INDEX idx_eav_attributes_code ON $t(code);",
         ]);
     }
 
@@ -119,14 +142,14 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
                 updated_at TIMESTAMP DEFAULT NOW(),
                 UNIQUE (entity_id, attribute_id)
             );",
-            "CREATE INDEX idx_values_entity_id ON $t(entity_id);",
-            "CREATE INDEX idx_values_attribute_id ON $t(attribute_id);",
-            "CREATE INDEX idx_values_entity_attr ON $t(entity_id, attribute_id);",
-            "CREATE INDEX idx_values_val_varchar ON $t(value_varchar);",
-            "CREATE INDEX idx_values_val_integer ON $t(value_integer);",
-            "CREATE INDEX idx_values_val_numeric ON $t(value_numeric);",
-            "CREATE INDEX idx_values_val_bool ON $t(value_bool);",
-            "CREATE INDEX idx_values_val_date ON $t(value_date);",
+            "CREATE INDEX idx_eav_values_entity_id ON $t(entity_id);",
+            "CREATE INDEX idx_eav_values_attribute_id ON $t(attribute_id);",
+            "CREATE INDEX idx_eav_values_entity_attr ON $t(entity_id, attribute_id);",
+            "CREATE INDEX idx_eav_values_val_varchar ON $t(value_varchar);",
+            "CREATE INDEX idx_eav_values_val_integer ON $t(value_integer);",
+            "CREATE INDEX idx_eav_values_val_numeric ON $t(value_numeric);",
+            "CREATE INDEX idx_eav_values_val_bool ON $t(value_bool);",
+            "CREATE INDEX idx_eav_values_val_date ON $t(value_date);",
         ]);
     }
 

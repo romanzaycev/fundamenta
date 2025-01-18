@@ -5,7 +5,7 @@ namespace Romanzaycev\Fundamenta\Components\Eav;
 interface Row
 {
     public function getId(): int;
-    public function getType(): string;
+    public function getTypeId(): int;
     public function getCreatedAt(): \DateTimeInterface;
     public function getUpdatedAt(): \DateTimeInterface;
     /**

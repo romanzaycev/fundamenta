@@ -4,8 +4,11 @@ namespace Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql;
 
 use Cycle\Database\DatabaseInterface;
 use Psr\Log\LoggerInterface;
+use Romanzaycev\Fundamenta\Components\Eav\AttributeHelper;
+use Romanzaycev\Fundamenta\Components\Eav\AttributeType;
 use Romanzaycev\Fundamenta\Components\Eav\Exceptions\QueryException;
 use Romanzaycev\Fundamenta\Components\Eav\Executor;
+use Romanzaycev\Fundamenta\Components\Eav\Order;
 use Romanzaycev\Fundamenta\Components\Eav\Query;
 use Romanzaycev\Fundamenta\Components\Eav\QueryBuilder\LogicCompiler;
 use Romanzaycev\Fundamenta\Components\Eav\Row;
@@ -14,9 +17,9 @@ use Romanzaycev\Fundamenta\Configuration;
 
 readonly class PgsqlExecutor implements Executor
 {
-    private string $valuesTable;
     private string $attributesTable;
     private string $entitiesTable;
+    private string $valuesTable;
 
     public function __construct(
         private Configuration $configuration,
@@ -26,9 +29,9 @@ readonly class PgsqlExecutor implements Executor
     )
     {
         $tablesCfg = $this->configuration->get("eav.schema.tables");
-        $this->valuesTable = $tablesCfg["value"];
-        $this->attributesTable = $tablesCfg["attribute"];
         $this->entitiesTable = $tablesCfg["entity"];
+        $this->attributesTable = $tablesCfg["attribute"];
+        $this->valuesTable = $tablesCfg["value"];
     }
 
     /**
@@ -47,73 +50,83 @@ readonly class PgsqlExecutor implements Executor
         $whereStr = $where ? $merger->merge((new LogicCompiler($where))->compile()) : "";
         $merger->finalize();
 
-        $withSql = /** @lang PostgreSQL */<<<'SQL'
-        WITH mapped_val AS (SELECT ev.entity_id as ei,
-           ev.attribute_id  as ai,
-           ea.code          as code,
-           ev.value_varchar as vv,
-           ev.value_text    as vt,
-           ev.value_integer as vi,
-           ev.value_numeric as vn,
-           ev.value_bool    as vb,
-           ev.value_date    as vd,
-           NULL             as notval
-        FROM %s ev
-        JOIN %s ea on ea.id = ev.attribute_id
-        JOIN %s ee on ee.id = ea.entity_id
-        WHERE ee.type = :eav_ee_type %s)
-        SQL;
-        $optimizationString = "";
-        $optiAttributesCodes = $ctx->getAttributesCodes();
+        $sortingSelectSql = "";
+        $orderParams = [];
+        $order = $query->getOrder();
 
-        if (is_array($optiAttributesCodes) && !empty($optiAttributesCodes)) {
-            $optimizationString .= " AND ea.code IN(";
-            $codePlaceholders = [];
+        if (!empty($order)) {
+            $attrOrderSqls = [];
 
-            foreach ($optiAttributesCodes as $i => $attributeCode) {
-                $codePlaceholders[] = ":eav_opti_ea". $i;
-                $ctx->bind("eav_opti_ea". $i, $attributeCode);
+            foreach ($order as $attr => $o) {
+                $attr = AttributeHelper::normalizeAttributeCode($attr);
+
+                if (AttributeHelper::isEntityOwned($attr)) {
+                    $orderParams[] = "ee." . $attr . " " . $o->value;
+                } else {
+                    if ($attribute = $this->materializer->getAttribute($query->getEntityTypeCode(), $attr)) {
+                        $attrOrderSqls[] = sprintf(
+                            "CASE WHEN pr.ea_code = cast('%s' as varchar) THEN ev.value_%s END AS sortable_%s",
+                            $attribute->code,
+                            match ($attribute->type) {
+                                AttributeType::VARCHAR => "varchar",
+                                AttributeType::TEXT => "text",
+                                AttributeType::INTEGER => "integer",
+                                AttributeType::NUMERIC => "numeric",
+                                AttributeType::BOOL => "bool",
+                                AttributeType::DATE_TIME => "date",
+                            },
+                            $attribute->code,
+                        );
+                        $sortingAggrFn = in_array($o, [Order::DESC, Order::DESC_NULLS, Order::NULLS_DESC]) ? "MAX" : "MIN";
+                        $orderParams[] = $sortingAggrFn . "(mapped_val.sortable_" . $attribute->code . ") " . $o->value;
+                    }
+                }
             }
 
-            $optimizationString .= (implode(", ", $codePlaceholders) . ")");
+            if (!empty($attrOrderSqls)) {
+                $sortingSelectSql = (",\n" . implode(",\n", $attrOrderSqls) . "\n");
+            }
         }
 
-        $withSql = sprintf(
-            $withSql,
-            $this->valuesTable,
-            $this->attributesTable,
-            $this->entitiesTable,
-            $optimizationString,
-        );
-        $ctx->bind("eav_ee_type", $query->getEntityType());
+        $withSql = $this->getWithSql($query, $ctx, $sortingSelectSql);
         $selectSql = /** @lang PostgreSQL */<<<'SQL'
-        SELECT ee.id as id,
-               ee.type as type,
-               ee.created_at as created_at,
-               ee.updated_at as updated_at,
-               json_agg(json_build_object('code', mapped_val.code, 'value',
-                   COALESCE(mapped_val.vv, mapped_val.vt, cast(mapped_val.vi as varchar),
-                       cast(mapped_val.vn as varchar), cast(mapped_val.vb as varchar),
-                       cast(mapped_val.vd as varchar)))) AS values
-        FROM %s ee
+        SELECT
+            ee.id         AS id,
+            ee.type_id    AS type_id,
+            ee.created_at AS created_at,
+            ee.updated_at AS updated_at,
+            jsonb_object_agg(
+                mapped_val.code,
+                COALESCE(
+                    mapped_val.vv,
+                    mapped_val.vt,
+                    cast(mapped_val.vi as varchar),
+                    cast(mapped_val.vn as varchar),
+                    cast(mapped_val.vb as varchar),
+                    cast(mapped_val.vd as varchar)
+                )
+            )::jsonb AS values
+        FROM %%eav_entities_tbl%% ee
         JOIN mapped_val ON ee.id = mapped_val.ei
         WHERE ee.id IN (SELECT ei FROM mapped_val)
         SQL;
-        $selectSql = sprintf($selectSql, $this->entitiesTable);
+        $selectSql = str_replace('%%eav_entities_tbl%%', $this->entitiesTable, $selectSql);
 
         if (!empty($whereStr)) {
             $whereStr = "\nAND " . $whereStr;
         }
 
         $sql = $withSql . "\n" . $selectSql . $whereStr;
-        $sql .= "\nGROUP BY ee.id, ee.type, ee.created_at, ee.updated_at";
+        $sql .= "\nGROUP BY ee.id, ee.type_id, ee.created_at, ee.updated_at";
+
+        $nonPaginatedBindings = $ctx->getBindings();
+
+        if (!empty($orderParams)) {
+            $sql .= "\nORDER BY " . \implode(", ", $orderParams);
+        }
+
         $limit = $query->getLimit();
         $offset = $query->getOffset();
-        $nonPaginatedBindings = $ctx->getBindings();
-        $countSql = $withSql . "\n" . "SELECT count(*) as cnt FROM (SELECT ee.id
-        FROM $this->entitiesTable ee
-        JOIN mapped_val ON ee.id = mapped_val.ei
-        WHERE ee.id IN (SELECT ei FROM mapped_val) $whereStr GROUP BY ee.id) as CT";
 
         if ($limit || $offset) {
             $ctx->bind("limit", (int)$limit);
@@ -128,6 +141,8 @@ readonly class PgsqlExecutor implements Executor
             ->debug("[PgsqlExecutor] SQL debug: " . $sql, [
                 "bindings" => $bindings,
             ]);
+
+        $countSql = $this->getCountSql($withSql, $whereStr);
 
         return new RowSet(
             $this
@@ -145,10 +160,122 @@ readonly class PgsqlExecutor implements Executor
             },
             fn (array $item): Row => PgsqlRow::create(
                 $item,
-                $query->getEntityType(),
+                $query->getEntityTypeCode(),
                 $this->materializer,
                 $this->logger,
             ),
         );
+    }
+
+    /**
+     * @throws QueryException
+     */
+    public function count(Query $query): int
+    {
+        $ctx = new QueryContext();
+
+        $where = $query->getWhere();
+        $merger = new Merger(
+            $query,
+            $ctx,
+            $this->materializer,
+        );
+        $whereStr = $where ? $merger->merge((new LogicCompiler($where))->compile()) : "";
+        $merger->finalize();
+
+        if (!empty($whereStr)) {
+            $whereStr = "\nAND " . $whereStr;
+        }
+
+        return (int)$this
+            ->database
+            ->query($this->getCountSql(
+                $this->getWithSql($query, $ctx),
+                $whereStr,
+            ), $ctx->getBindings())
+            ->fetchColumn(0);
+    }
+
+    /**
+     * @throws QueryException
+     */
+    public function getWithSql(Query $query, QueryContext $ctx, string $sortingSelectSql = ""): string
+    {
+        $withSql = /** @lang PostgreSQL */<<<'SQL'
+        WITH
+            pr AS (
+                SELECT
+                    ee.id   AS ee_id,
+                    ea.id   AS ea_id,
+                    ea.code AS ea_code
+                FROM %%eav_entities_tbl%% ee
+                CROSS JOIN %%eav_attributes_tbl%% ea
+                WHERE
+                    ee.type_id = :eav_ee_type_id
+                    AND ea.type_id = :eav_ee_type_id
+                    %%optimization_where_sql%%
+            ),
+            mapped_val AS (
+                SELECT
+                    pr.ee_id         AS ei,
+                    pr.ea_id         AS ai,
+                    pr.ea_code       AS code,
+                    ev.value_varchar AS vv,
+                    ev.value_text    AS vt,
+                    ev.value_integer AS vi,
+                    ev.value_numeric AS vn,
+                    ev.value_bool    AS vb,
+                    ev.value_date    AS vd%%sorting_select_sql%%
+                FROM pr
+                LEFT JOIN %%eav_values_tbl%% ev ON ev.attribute_id = pr.ea_id AND ev.entity_id = pr.ee_id
+            )
+        SQL;
+
+        $optimizationString = "";
+        $optiAttributesCodes = $ctx->getSelectedAttributesCodes();
+
+        if (is_array($optiAttributesCodes) && !empty($optiAttributesCodes)) {
+            $optimizationString .= "AND ea.code IN(";
+            $codePlaceholders = [];
+
+            foreach ($optiAttributesCodes as $i => $attributeCode) {
+                $codePlaceholders[] = ":eav_opti_ea_code". $i;
+                $ctx->bind("eav_opti_ea_code". $i, $attributeCode);
+            }
+
+            $optimizationString .= (implode(", ", $codePlaceholders) . ")");
+        }
+
+        $withSql = str_replace("%%optimization_where_sql%%", $optimizationString, $withSql);
+        $ctx->bind(
+            "eav_ee_type_id",
+            $this->materializer->getTypeIdByCode($query->getEntityTypeCode()),
+        );
+
+        return str_replace(
+            [
+                "%%eav_entities_tbl%%",
+                "%%eav_attributes_tbl%%",
+                "%%eav_values_tbl%%",
+                "%%sorting_select_sql%%",
+                "%%optimization_where_sql%%",
+            ],
+            [
+                $this->entitiesTable,
+                $this->attributesTable,
+                $this->valuesTable,
+                $sortingSelectSql,
+                $optimizationString,
+            ],
+            $withSql,
+        );
+    }
+
+    public function getCountSql(string $withSql, string $whereStr): string
+    {
+        return $withSql . "\n" . "SELECT count(*) as cnt FROM (SELECT ee.id
+            FROM $this->entitiesTable ee
+            JOIN mapped_val ON ee.id = mapped_val.ei
+            WHERE ee.id IN (SELECT ei FROM mapped_val) $whereStr GROUP BY ee.id) as CT";
     }
 }

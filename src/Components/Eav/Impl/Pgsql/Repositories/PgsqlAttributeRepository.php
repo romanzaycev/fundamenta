@@ -17,7 +17,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
 {
     private string $table;
-    private string $entityTable;
+    private string $typeTable;
 
     public function __construct(
         private DatabaseInterface $database,
@@ -27,12 +27,12 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
     )
     {
         $this->table = $this->configuration->get("eav.schema.tables.attribute");
-        $this->entityTable = $this->configuration->get("eav.schema.tables.entity");
+        $this->typeTable = $this->configuration->get("eav.schema.tables.type");
     }
 
     public function create(
-        int $entityId,
-        string $code,
+        int           $typeId,
+        string        $code,
         AttributeType $type,
     ): Attribute
     {
@@ -42,18 +42,18 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
             throw new \InvalidArgumentException();
         }
 
-        if (AttributeHelper::isDeniedCode($code)) {
+        if (AttributeHelper::isEntityOwned($code)) {
             throw new \InvalidArgumentException("Invalid attribute code \"$code\"");
         }
 
         $this->schemaInitializer->initialize();
         $stmt = $this->database->query(/** @lang PostgreSQL */"
-            INSERT INTO $this->table (entity_id, code, data_type)
-            VALUES (:entity_id, :code, :data_type)
-            ON CONFLICT (entity_id, code) DO UPDATE SET data_type = EXCLUDED.data_type
+            INSERT INTO $this->table (type_id, code, data_type)
+            VALUES (:type_id, :code, :data_type)
+            ON CONFLICT (type_id, code) DO UPDATE SET data_type = EXCLUDED.data_type
             RETURNING *
         ", [
-            "entity_id" => $entityId,
+            "type_id" => $typeId,
             "code" => $code,
             "data_type" => $type->value,
         ]);
@@ -68,13 +68,13 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
         return $attribute;
     }
 
-    public function findByName(int $entityId, string $code): ?Attribute
+    public function findByCode(int $typeId, string $code): ?Attribute
     {
         $this->schemaInitializer->initialize();
         $stmt = $this->database->query(
-            /** @lang PostgreSQL */"SELECT * FROM $this->table WHERE entity_id = :entity_id AND code = :code LIMIT 1",
+            /** @lang PostgreSQL */"SELECT * FROM $this->table WHERE type_id = :type_id AND code = :code LIMIT 1",
             [
-                "entity_id" => $entityId,
+                "type_id" => $typeId,
                 "code" => $code,
             ]
         );
@@ -91,7 +91,7 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
         $this->schemaInitializer->initialize();
         $stmt = $this->database->query(
             /** @lang PostgreSQL */"SELECT * FROM $this->table WHERE id = :id LIMIT 1",
-            ['id' => $id]
+            ["id" => $id]
         );
 
         if ($data = $stmt->fetch()) {
@@ -108,6 +108,9 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
             ->database
             ->query(
                 /** @lang PostgreSQL */"DELETE FROM $this->table WHERE id = :id",
+                [
+                    "id" => $id,
+                ]
             );
         $this
             ->eventDispatcher
@@ -119,14 +122,14 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
             );
     }
 
-    public function getList(int $entityId): array
+    public function getList(int $typeId): array
     {
         $this->schemaInitializer->initialize();
         $result = [];
         $stmt = $this->database->query(
-            /** @lang PostgreSQL */"SELECT * FROM $this->table WHERE entity_id = :entity_id",
+            /** @lang PostgreSQL */"SELECT * FROM $this->table WHERE type_id = :type_id",
             [
-                "entity_id" => $entityId,
+                "type_id" => $typeId,
             ]
         );
 
@@ -137,11 +140,11 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
         return $result;
     }
 
-    public function getListByEntityType(string $entityType): array
+    public function getListByEntityTypeCode(string $entityTypeCode): array
     {
         $this->schemaInitializer->initialize();
         $t = $this->table;
-        $et = $this->entityTable;
+        $tt = $this->typeTable;
         $result = [];
         $stmt = $this->database->query(
             /** @lang PostgreSQL */"
@@ -149,11 +152,11 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
                     $t.*
                 FROM
                     $t
-                JOIN $et ON $t.entity_id = $et.id
-                WHERE $et.type = :entity_type
+                JOIN $tt ON $t.type_id = $tt.id
+                WHERE $tt.code = :entity_type_code
             ",
             [
-                "entity_type" => $entityType,
+                "entity_type_code" => $entityTypeCode,
             ]
         );
 
@@ -168,7 +171,7 @@ readonly class PgsqlAttributeRepository implements AttributeRepositoryInterface
     {
         return new Attribute(
             (int)$row["id"],
-            (int)$row["entity_id"],
+            (int)$row["type_id"],
             $row["code"],
             AttributeType::from($row["data_type"]),
             PgsqlDateHelper::toNative($row["created_at"]),
