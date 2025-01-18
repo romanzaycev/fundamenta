@@ -26,14 +26,23 @@ readonly class PgsqlEntityRepository implements EntityRepositoryInterface
         $this->table = $this->configuration->get("eav.schema.tables.entity");
     }
 
-    public function create(int $typeId): Entity
+    public function create(int $typeId, ?string $alias = null): Entity
     {
+        if ($alias) {
+            if (mb_strlen($alias) > 512) {
+                throw new \InvalidArgumentException();
+            }
+        }
+
         $this->schemaInitializer->initialize();
         $stmt = $this
             ->database
             ->query(
-                /** @lang PostgreSQL */"INSERT INTO $this->table (type_id) VALUES (:type_id) RETURNING *",
-                ["type_id" => $typeId],
+                /** @lang PostgreSQL */"INSERT INTO $this->table (type_id, alias) VALUES (:type_id, :alias) RETURNING *",
+                [
+                    "type_id" => $typeId,
+                    "alias" => $alias,
+                ],
             );
         $entity = $this->map($stmt->fetch());
         $this
@@ -85,6 +94,7 @@ readonly class PgsqlEntityRepository implements EntityRepositoryInterface
         return new Entity(
             (int)$row["id"],
             (int)$row["type_id"],
+            !empty($row["alias"]) ? $row["alias"] : null,
             PgsqlDateHelper::toNative($row["created_at"]),
             PgsqlDateHelper::toNative($row["updated_at"]),
         );

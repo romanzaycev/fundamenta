@@ -49,7 +49,9 @@ class Merger implements LogicMerger
      */
     protected function visit(array &$parts, string $field, Operator $op, mixed $value): void
     {
-        $field = AttributeHelper::normalizeAttributeCode($field);
+        if (!AttributeHelper::isEntityOwned($field)) {
+            $field = AttributeHelper::normalizeAttributeCode($field);
+        }
 
         if (empty($field)) {
             throw new QueryException();
@@ -68,8 +70,8 @@ class Merger implements LogicMerger
         $isCodeCondNeeded = true;
         $valueColumn = "";
 
-        if ($field === "id") {
-            $field = "ee.id";
+        if (AttributeHelper::isEntityOwned($field)) {
+            $field = "ee." . $field;
             $isCodeCondNeeded = false;
         } else {
             $attribute = $this
@@ -105,7 +107,7 @@ class Merger implements LogicMerger
             $placeholder = "(" . $placeholder . ")";
         }
 
-        $parts[] = "(" . ($isCodeCondNeeded ? "mapped_val.code = '$field' AND mapped_val.$valueColumn" : "") . " $strOp $placeholder)";
+        $parts[] = "(" . ($isCodeCondNeeded ? "mapped_val.code = '$field' AND mapped_val.$valueColumn" : $field) . " $strOp $placeholder)";
     }
 
     private function isSomeSelected(): bool

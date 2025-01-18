@@ -15,6 +15,7 @@ readonly class PgsqlRow implements Row
     public function __construct(
         private int $id,
         private int $typeId,
+        private ?string $alias,
         private \DateTimeInterface $createdAt,
         private \DateTimeInterface $updatedAt,
         private array $attributes,
@@ -24,6 +25,7 @@ readonly class PgsqlRow implements Row
     {
         $id = (int)($item["id"] ?? null);
         $typeId = (int)($item["type_id"] ?? null);
+        $alias = $item["alias"] ?? null;
         $createdAt = PgsqlDateHelper::toNative($item["created_at"] ?? '') ?? new \DateTimeImmutable();
         $updatedAt = PgsqlDateHelper::toNative($item["updated_at"] ?? '') ?? new \DateTimeImmutable();
         $attributes = [];
@@ -76,6 +78,7 @@ readonly class PgsqlRow implements Row
         return new self(
             $id,
             $typeId,
+            $alias,
             $createdAt,
             $updatedAt,
             $attributes,
@@ -90,6 +93,11 @@ readonly class PgsqlRow implements Row
     public function getTypeId(): int
     {
         return $this->typeId;
+    }
+
+    public function getAlias(): ?string
+    {
+        return $this->alias;
     }
 
     public function getCreatedAt(): \DateTimeInterface

@@ -92,10 +92,12 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
             CREATE TABLE $t (
                 id SERIAL PRIMARY KEY,
                 type_id INTEGER NOT NULL REFERENCES $tt(id) ON DELETE CASCADE,
+                alias VARCHAR(512) NULL DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT NOW(),
                 updated_at TIMESTAMP DEFAULT NOW()
             );",
             "CREATE INDEX idx_eav_entities_type ON $t(type_id);",
+            "CREATE INDEX idx_eav_entities_alias ON $t(alias);",
         ]);
     }
 

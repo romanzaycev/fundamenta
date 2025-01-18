@@ -6,7 +6,7 @@ use Romanzaycev\Fundamenta\Components\Eav\Entity;
 
 interface EntityRepositoryInterface
 {
-    public function create(int $typeId): Entity;
+    public function create(int $typeId, ?string $alias = null): Entity;
 
     public function findById(int $id): ?Entity;
 

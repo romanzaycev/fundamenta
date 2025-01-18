@@ -7,6 +7,7 @@ final class AttributeHelper
     /** @var string[] */
     public const ENTITY_CODES = [
         "id",
+        "alias",
         "created_at",
         "updated_at",
     ];
@@ -18,6 +19,10 @@ final class AttributeHelper
 
     public static function isEntityOwned(string $code): bool
     {
+        if (str_starts_with($code, "ee.")) {
+            $code = str_replace("ee.", "", $code);
+        }
+
         return in_array($code, self::ENTITY_CODES, true);
     }
 }

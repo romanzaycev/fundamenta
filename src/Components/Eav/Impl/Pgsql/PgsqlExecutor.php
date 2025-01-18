@@ -93,6 +93,7 @@ readonly class PgsqlExecutor implements Executor
         SELECT
             ee.id         AS id,
             ee.type_id    AS type_id,
+            ee.alias      AS alias,
             ee.created_at AS created_at,
             ee.updated_at AS updated_at,
             jsonb_object_agg(
@@ -117,7 +118,7 @@ readonly class PgsqlExecutor implements Executor
         }
 
         $sql = $withSql . "\n" . $selectSql . $whereStr;
-        $sql .= "\nGROUP BY ee.id, ee.type_id, ee.created_at, ee.updated_at";
+        $sql .= "\nGROUP BY ee.id, ee.type_id, ee.created_at, ee.updated_at, ee.alias";
 
         $nonPaginatedBindings = $ctx->getBindings();
 
@@ -225,7 +226,8 @@ readonly class PgsqlExecutor implements Executor
                     ev.value_integer AS vi,
                     ev.value_numeric AS vn,
                     ev.value_bool    AS vb,
-                    ev.value_date    AS vd%%sorting_select_sql%%
+                    ev.value_date    AS vd,
+                    NULL             AS notval%%sorting_select_sql%%
                 FROM pr
                 LEFT JOIN %%eav_values_tbl%% ev ON ev.attribute_id = pr.ea_id AND ev.entity_id = pr.ee_id
             )
