@@ -30,7 +30,7 @@ class Rbac extends ModuleBootstrapper
     public static function requires(): array
     {
         return [
-            Dotenv::class,
+            Auth::class,
         ];
     }
 

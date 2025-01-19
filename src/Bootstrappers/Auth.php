@@ -12,6 +12,8 @@ use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
 use Romanzaycev\Fundamenta\Components\Auth\TokenTransportHolder;
 use Romanzaycev\Fundamenta\Components\Auth\TokenTransportProvider;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\CookieTransport;
+use Romanzaycev\Fundamenta\Components\Auth\UserProvider;
+use Romanzaycev\Fundamenta\Components\Auth\UserProviderHolder;
 use Romanzaycev\Fundamenta\Components\Startup\HookManager;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
@@ -79,13 +81,14 @@ class Auth extends ModuleBootstrapper
     public static function provisioning(
         TokenStorageHolder $storageHolder,
         TokenTransportHolder $transportHolder,
+        UserProviderHolder $userProviderHolder,
         Container $container,
     ): array
     {
         return [
             new ProvisionDecl(
                 TokenStorageProvider::class,
-                function (array $providers) use ($storageHolder, $container): void {
+                static function (array $providers) use ($storageHolder, $container): void {
                     foreach ($providers as $provider) {
                         /** @var TokenStorageProvider $provider */
                         $cycle = $provider->getLifecycle();
@@ -108,7 +111,7 @@ class Auth extends ModuleBootstrapper
 
             new ProvisionDecl(
                 TokenTransportProvider::class,
-                function (array $providers) use ($transportHolder): void {
+                static function (array $providers) use ($transportHolder): void {
                     foreach ($providers as $provider) {
                         /** @var TokenTransportProvider $provider */
                         $trs = $provider->get();
@@ -122,6 +125,16 @@ class Auth extends ModuleBootstrapper
                         }
                     }
                 },
+            ),
+
+            new ProvisionDecl(
+                UserProvider::class,
+                static function (array $providers) use ($userProviderHolder): void {
+                    /** @var UserProvider[] $providers */
+                    foreach ($providers as $provider) {
+                        $userProviderHolder->register($provider);
+                    }
+                }
             ),
         ];
     }

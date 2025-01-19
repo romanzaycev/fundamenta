@@ -3,10 +3,10 @@
 namespace Romanzaycev\Fundamenta\Components\Rbac\Impl\Pgsql;
 
 use Cycle\Database\DatabaseInterface;
+use Romanzaycev\Fundamenta\Components\Auth\User;
 use Romanzaycev\Fundamenta\Components\Rbac\Role;
 use Romanzaycev\Fundamenta\Components\Rbac\RoleHolder;
 use Romanzaycev\Fundamenta\Components\Rbac\RoleRepository;
-use Romanzaycev\Fundamenta\Components\Rbac\Subject;
 use Romanzaycev\Fundamenta\Configuration;
 
 class PgsqlRoleRepository implements RoleRepository
@@ -23,11 +23,11 @@ class PgsqlRoleRepository implements RoleRepository
         $this->table = $this->configuration->get("rbac.schema.tables.role", "rbac_roles");
     }
 
-    public function getBySubject(Subject|string $subjectOrId): array
+    public function getBySubject(User|string $subjectOrId): array
     {
         $this->schemaInitializer->initialize();
         $result = [];
-        $subjectId = $subjectOrId instanceof Subject ? $subjectOrId->getSubjectId() : $subjectOrId;
+        $subjectId = $subjectOrId instanceof User ? $subjectOrId->getId() : $subjectOrId;
         $res = $this
             ->database
             ->query(
@@ -46,8 +46,9 @@ class PgsqlRoleRepository implements RoleRepository
         return $result;
     }
 
-    public function add(Subject|string $subjectOrId, Role|string $roleOrCode): void
+    public function add(User|string $subjectOrId, Role|string $roleOrCode): void
     {
+        $this->schemaInitializer->initialize();
         $this
             ->database
             ->query(
@@ -56,14 +57,15 @@ class PgsqlRoleRepository implements RoleRepository
                     ON CONFLICT (subject_id, role) DO NOTHING
                 ",
                 [
-                    "subject_id" => $subjectOrId instanceof Subject ? $subjectOrId->getSubjectId() : $subjectOrId,
+                    "subject_id" => $subjectOrId instanceof User ? $subjectOrId->getId() : $subjectOrId,
                     "role" => $roleOrCode instanceof Role ? $roleOrCode->getCode() : $roleOrCode,
                 ],
             );
     }
 
-    public function remove(Subject|string $subjectOrId, Role|string $roleOrCode): void
+    public function remove(User|string $subjectOrId, Role|string $roleOrCode): void
     {
+        $this->schemaInitializer->initialize();
         $this
             ->database
             ->query(
@@ -71,7 +73,7 @@ class PgsqlRoleRepository implements RoleRepository
                     DELETE FROM $this->table WHERE subject_id = :subject_id AND role = :role
                 ",
                 [
-                    "subject_id" => $subjectOrId instanceof Subject ? $subjectOrId->getSubjectId() : $subjectOrId,
+                    "subject_id" => $subjectOrId instanceof User ? $subjectOrId->getId() : $subjectOrId,
                     "role" => $roleOrCode instanceof Role ? $roleOrCode->getCode() : $roleOrCode,
                 ],
             );

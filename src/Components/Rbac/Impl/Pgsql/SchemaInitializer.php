@@ -26,9 +26,15 @@ class SchemaInitializer
 
     public function initialize(): void
     {
+        if ($this->initialized) {
+            return;
+        }
+
         if (!$this->isTableExists($this->database, $this->rolesTable)) {
             $this->creatRolesTable();
         }
+
+        $this->initialized = true;
     }
 
     private function creatRolesTable(): void

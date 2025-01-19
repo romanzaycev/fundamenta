@@ -2,9 +2,9 @@
 
 namespace Romanzaycev\Fundamenta\Components\Rbac\Impl\InMemory;
 
+use Romanzaycev\Fundamenta\Components\Auth\User;
 use Romanzaycev\Fundamenta\Components\Rbac\Role;
 use Romanzaycev\Fundamenta\Components\Rbac\RoleRepository;
-use Romanzaycev\Fundamenta\Components\Rbac\Subject;
 
 class InMemoryRoleRepository implements RoleRepository
 {
@@ -32,9 +32,9 @@ class InMemoryRoleRepository implements RoleRepository
         }
     }
 
-    public function getBySubject(Subject|string $subjectOrId): array
+    public function getBySubject(User|string $subjectOrId): array
     {
-        $subjectId = $subjectOrId instanceof Subject ? $subjectOrId->getSubjectId() : $subjectOrId;
+        $subjectId = $subjectOrId instanceof User ? $subjectOrId->getId() : $subjectOrId;
         $result = [];
 
         if (isset($this->subjectRoles[$subjectId])) {
@@ -46,9 +46,9 @@ class InMemoryRoleRepository implements RoleRepository
         return $result;
     }
 
-    public function add(Subject|string $subjectOrId, Role|string $roleOrCode): void
+    public function add(User|string $subjectOrId, Role|string $roleOrCode): void
     {
-        $subjectId = $subjectOrId instanceof Subject ? $subjectOrId->getSubjectId() : $subjectOrId;
+        $subjectId = $subjectOrId instanceof User ? $subjectOrId->getId() : $subjectOrId;
         $roleCode = $roleOrCode instanceof Role ? $roleOrCode->getCode() : $roleOrCode;
 
         if (isset($this->roleMap[$roleCode])) {
@@ -60,9 +60,9 @@ class InMemoryRoleRepository implements RoleRepository
         }
     }
 
-    public function remove(Subject|string $subjectOrId, Role|string $roleOrCode): void
+    public function remove(User|string $subjectOrId, Role|string $roleOrCode): void
     {
-        $subjectId = $subjectOrId instanceof Subject ? $subjectOrId->getSubjectId() : $subjectOrId;
+        $subjectId = $subjectOrId instanceof User ? $subjectOrId->getId() : $subjectOrId;
         $roleCode = $roleOrCode instanceof Role ? $roleOrCode->getCode() : $roleOrCode;
 
         if (isset($this->subjectRoles[$subjectId])) {

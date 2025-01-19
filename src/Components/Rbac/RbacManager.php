@@ -2,6 +2,8 @@
 
 namespace Romanzaycev\Fundamenta\Components\Rbac;
 
+use Romanzaycev\Fundamenta\Components\Auth\User;
+
 readonly class RbacManager
 {
     public function __construct(
@@ -9,7 +11,7 @@ readonly class RbacManager
         private PermissionRepository $permissionRepository,
     ) {}
 
-    public function hasPermission(Subject $subject, string|Permission $permissionCode): bool
+    public function hasPermission(User $subject, string|Permission $permissionCode): bool
     {
         $permissionCode = $permissionCode instanceof Permission
             ? $permissionCode->getCode()
@@ -34,7 +36,7 @@ readonly class RbacManager
     /**
      * @return Role[]
      */
-    public function getRoles(Subject $subject): array
+    public function getRoles(User $subject): array
     {
         return $this
             ->roleRepository
@@ -45,7 +47,7 @@ readonly class RbacManager
     /**
      * @return Permission[]
      */
-    public function getPermissions(Subject $subject): array
+    public function getPermissions(User $subject): array
     {
         return $this
             ->permissionRepository

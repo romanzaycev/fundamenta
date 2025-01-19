@@ -5,7 +5,7 @@ namespace Romanzaycev\Fundamenta\Tests\Components\Rbac\Impl\InMemory;
 use PHPUnit\Framework\TestCase;
 use Romanzaycev\Fundamenta\Components\Rbac\Impl\InMemory\InMemoryRoleRepository;
 use Romanzaycev\Fundamenta\Components\Rbac\Models\Role;
-use Romanzaycev\Fundamenta\Tests\Stubs\Rbac\StubSubject;
+use Romanzaycev\Fundamenta\Tests\Stubs\Rbac\StubUser;
 
 class InMemoryRoleRepositoryTest extends TestCase
 {
@@ -40,7 +40,7 @@ class InMemoryRoleRepositoryTest extends TestCase
                     new Role("foo", "Foo role"),
                     new Role("baz", "Baz role"),
                 ],
-                $this->getInstance()->getBySubject(new StubSubject("subj1")),
+                $this->getInstance()->getBySubject(new StubUser("subj1")),
                 "Getting by instance",
             );
     }

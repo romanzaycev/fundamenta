@@ -2,15 +2,15 @@
 
 namespace Romanzaycev\Fundamenta\Tests\Stubs\Rbac;
 
-use Romanzaycev\Fundamenta\Components\Rbac\Subject;
+use Romanzaycev\Fundamenta\Components\Auth\User;
 
-readonly class StubSubject implements Subject
+readonly class StubUser implements User
 {
     public function __construct(
         private string $id,
     ) {}
 
-    public function getSubjectId(): string
+    public function getId(): string
     {
         return $this->id;
     }
