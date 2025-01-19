@@ -16,7 +16,6 @@ use Romanzaycev\Fundamenta\Components\Startup\HookManager;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
-use Slim\App;
 use function DI\autowire;
 
 class Auth extends ModuleBootstrapper

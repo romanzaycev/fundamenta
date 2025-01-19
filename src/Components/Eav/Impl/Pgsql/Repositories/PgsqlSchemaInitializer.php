@@ -5,9 +5,12 @@ namespace Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql\Repositories;
 use Cycle\Database\DatabaseInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\SchemaInitializerInterface;
 use Romanzaycev\Fundamenta\Configuration;
+use Romanzaycev\Fundamenta\Infrastructure\Pgsql\Traits\IsTableExistsTrait;
 
 class PgsqlSchemaInitializer implements SchemaInitializerInterface
 {
+    use IsTableExistsTrait;
+
     private bool $initialized = false;
     private readonly string $schema;
     private readonly string $typesTable;
@@ -34,38 +37,23 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
             return;
         }
 
-        if (!$this->isTableExists($this->typesTable)) {
+        if (!$this->isTableExists($this->database, $this->typesTable)) {
             $this->creatTypesTable();
         }
 
-        if (!$this->isTableExists($this->entitiesTable)) {
+        if (!$this->isTableExists($this->database, $this->entitiesTable)) {
             $this->creatEntitiesTable();
         }
 
-        if (!$this->isTableExists($this->attributesTable)) {
+        if (!$this->isTableExists($this->database, $this->attributesTable)) {
             $this->creatAttributesTable();
         }
 
-        if (!$this->isTableExists($this->valuesTable)) {
+        if (!$this->isTableExists($this->database, $this->valuesTable)) {
             $this->createValuesTable();
         }
 
         $this->initialized = true;
-    }
-
-    private function isTableExists(string $table): bool
-    {
-        $result = $this
-            ->database
-            ->query(
-            /** @lang PostgreSQL */"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = :ts AND table_name = :tn)",
-                [
-                    "ts" => $this->schema,
-                    "tn" => $table,
-                ]
-            )->fetchColumn(0);
-
-        return $result === "true" || $result === true;
     }
 
     private function creatTypesTable(): void
