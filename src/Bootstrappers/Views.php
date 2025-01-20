@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Components\Views\EngineManager;
 use Romanzaycev\Fundamenta\Components\Views\ViewEngineProvider;
-use Romanzaycev\Fundamenta\Components\Views\ViewSystem;
+use Romanzaycev\Fundamenta\Components\Views\ViewManager;
 use Romanzaycev\Fundamenta\Components\Views\View;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
@@ -38,15 +38,15 @@ class Views extends ModuleBootstrapper
     public static function boot(ContainerBuilder $builder, Configuration $configuration): void
     {
         $builder->addDefinitions([
-            ViewSystem::class => static function (Container $container) use ($configuration) {
-                return new ViewSystem(
+            ViewManager::class => static function (Container $container) use ($configuration) {
+                return new ViewManager(
                     $configuration,
                     $container->get(CacheItemPoolInterface::class),
                     $container->get(LoggerInterface::class),
                 );
             },
-            EngineManager::class => get(ViewSystem::class),
-            View::class => get(ViewSystem::class),
+            EngineManager::class => get(ViewManager::class),
+            View::class => get(ViewManager::class),
         ]);
     }
 

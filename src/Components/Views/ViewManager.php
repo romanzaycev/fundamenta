@@ -14,7 +14,7 @@ use Romanzaycev\Fundamenta\Components\Views\Exceptions\EngineManagerException;
 use Romanzaycev\Fundamenta\Components\Views\Exceptions\RenderingException;
 use Romanzaycev\Fundamenta\Configuration;
 
-class ViewSystem implements View, EngineManager
+class ViewManager implements View, EngineManager
 {
     private readonly ViewEngine $nullEngine;
 
