@@ -5,5 +5,10 @@ namespace Romanzaycev\Fundamenta\Components\Http\Static;
 interface InternalStaticFileInterface
 {
     public function getPublicFile(): string;
+
     public function getRealFile(): string;
+
+    public function preprocess(string $content): ?string;
+
+    public function isPreprocessed(): bool;
 }

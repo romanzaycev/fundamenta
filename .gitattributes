@@ -7,3 +7,7 @@
 /.env.dist      export-ignore
 /devsite        export-ignore
 /README.md      export-ignore
+/package.json
+/package-lock.json
+/tsconfig.json
+/node_modules

@@ -1,8 +1,11 @@
 /.idea/
 /build/
 /vendor/
+/node_modules/
 composer.lock
 *.log
 *.tmp
 /devsite/runtime
 !/devsite/runtime/.gitkeep
+/ui-public
+/ui/assets/svg-sprite/

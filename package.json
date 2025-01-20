@@ -1,0 +1,31 @@
+{
+  "name": "fundamenta",
+  "version": "1.0.0",
+  "description": "Fundamenta admin UI",
+  "main": "ui/app.ts",
+  "scripts": {
+    "build": "node build-ui.js",
+    "dev": "node build.js --watch"
+  },
+  "author": "Roman Zaycev <box@romanzaycev.ru>",
+  "license": "MIT",
+  "devDependencies": {
+    "cheerio": "^1.0.0",
+    "command-line-args": "^6.0.1",
+    "esbuild": "^0.24.2",
+    "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-vue3": "^0.4.2",
+    "esbuild-sass-plugin": "^1.8.2",
+    "glob": "^11.0.1",
+    "sass": "^1.60.0",
+    "svg-sprite": "^2.0.4"
+  },
+  "dependencies": {
+    "pinia": "^2.3.1",
+    "reflect-metadata": "^0.1.14",
+    "tsyringe": "^4.8.0",
+    "vue": "3.5.11",
+    "vue-router": "^4.5.0",
+    "vuestic-ui": "^1.10.3"
+  }
+}

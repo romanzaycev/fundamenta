@@ -2,11 +2,9 @@
 
 namespace Romanzaycev\Fundamenta\Components\Server\OpenSwoole;
 
-use Romanzaycev\Fundamenta\Bootstrappers\OpenSwoole;
 use Romanzaycev\Fundamenta\Components\Http\Static\InternalStaticDirectoryInterface;
 use Romanzaycev\Fundamenta\Components\Http\Static\InternalStaticFileInterface;
 use Romanzaycev\Fundamenta\Components\Http\Static\StaticHandler;
-use Romanzaycev\Fundamenta\Configuration;
 use OpenSwoole\HTTP\Response;
 
 class SwooleStaticHandler implements StaticHandler
@@ -68,7 +66,20 @@ class SwooleStaticHandler implements StaticHandler
 
     private function respondFile(InternalStaticFileInterface $file, Response $response): void
     {
-        $this->sendfile(realpath($file->getRealFile()), $response);
+        $realPath = realpath($file->getRealFile());
+
+        if (!$file->isPreprocessed()) {
+            $this->sendfile($realPath, $response);
+            return;
+        }
+
+        if (!$realPath || !is_file($realPath)) {
+            $response->status(404);
+            $response->end();
+            return;
+        }
+
+        $response->end($file->preprocess(file_get_contents($realPath)));
     }
 
     private function respondFileFromDirectory(InternalStaticDirectoryInterface $dir, string $requestedFile, Response $response): void

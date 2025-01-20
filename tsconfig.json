@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "ui/src/*"
+      ],
+      "@screen/*": [
+        "ui/src/components/screens/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "ui/src/**/*.ts",
+    "ui/src/**/*.tsx",
+    "ui/src/**/*.vue",
+    "ui/tests/**/*.ts",
+    "ui/tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "typeRoots": ["ui/src/types.d.ts"],
+  "resolveJsonModule": true
+}
