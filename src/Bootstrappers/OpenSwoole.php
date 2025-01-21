@@ -28,6 +28,7 @@ class OpenSwoole extends ModuleBootstrapper
                     "worker_num" => 2,
                     "document_root" => Env::getString("DOCUMENT_ROOT", ""),
                     "enable_static_handler" => true,
+                    "max_request" => 0,
                     "http_index_files" => [
                         "index.html",
                         "index.htm",

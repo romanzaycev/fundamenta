@@ -72,7 +72,7 @@
     "phpstan": "phpstan analyse -c phpstan.neon --ansi --xdebug",
     "start": [
       "Composer\\Config::disableProcessTimeout",
-      "XDEBUG_MODE=off php devsite/server.php"
+      "XDEBUG_MODE=off php -dxdebug.mode=off devsite/server.php"
     ],
     "checks": [
       "@phplint",

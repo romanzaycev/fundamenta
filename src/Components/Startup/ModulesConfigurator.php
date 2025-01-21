@@ -6,7 +6,6 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
-use Romanzaycev\Fundamenta\ModuleBootstrapper;
 use Slim\App;
 
 class ModulesConfigurator
@@ -14,12 +13,13 @@ class ModulesConfigurator
     private ?array $sorted = null;
 
     /**
-     * @param class-string<ModuleBootstrapper>[] $bootstrappers
+     * @param class-string<Bootstrapper>[] $bootstrappers
      */
     public function __construct(
         protected readonly Configuration $configuration,
         protected readonly ContainerBuilder $containerBuilder,
         protected readonly array $bootstrappers,
+        protected readonly DefaultModuleManager $moduleManager,
     ) {}
 
     /**
@@ -39,6 +39,7 @@ class ModulesConfigurator
     {
         foreach ($this->getSorted() as $bootstrapper) {
             call_user_func([$bootstrapper, "boot"], $this->containerBuilder, $this->configuration);
+            $this->moduleManager->markAsEnabled($bootstrapper);
         }
     }
 

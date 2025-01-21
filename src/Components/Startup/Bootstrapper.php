@@ -9,11 +9,11 @@ use Romanzaycev\Fundamenta\Configuration;
 use Slim\App;
 
 /**
- * @method void afterContainerBuilt(?mixed ...$args)
- * @method ProvisionDecl[] provisioning(?mixed ...$args)
- * @method void router(App $app, ?mixed ...$args)
- * @method array<string|callable|MiddlewareInterface> middlewares(?mixed ...$args)
- * @method void booted(?mixed ...$args)
+ * @method static void afterContainerBuilt(?mixed ...$args)
+ * @method static ProvisionDecl[] provisioning(?mixed ...$args)
+ * @method static void router(App $app, ?mixed ...$args)
+ * @method static array<string|callable|MiddlewareInterface> middlewares(?mixed ...$args)
+ * @method static void booted(?mixed ...$args)
  */
 interface Bootstrapper
 {

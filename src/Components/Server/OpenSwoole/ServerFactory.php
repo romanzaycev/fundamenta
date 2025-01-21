@@ -18,6 +18,7 @@ class ServerFactory
         'settings' => [],
     ];
 
+    /** @var mixed[] */
     private array $options = [];
 
     public static function getDefaultOptions(): array

@@ -11,7 +11,9 @@ use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\OpenSwooleHelper;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\SwooleStaticHandler;
 use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
+use Romanzaycev\Fundamenta\Components\Startup\DefaultModuleManager;
 use Romanzaycev\Fundamenta\Components\Startup\HookManager;
+use Romanzaycev\Fundamenta\Components\Startup\ModuleManager;
 use Romanzaycev\Fundamenta\Components\Startup\ModulesConfigurator;
 use Romanzaycev\Fundamenta\Components\Startup\ApplicationHookManager;
 use Slim\App;
@@ -19,6 +21,9 @@ use Slim\Factory\AppFactory;
 
 class ApplicationBuilder
 {
+    /**
+     * @param class-string<Bootstrapper>[] $bootstrappers
+     */
     public function __construct(
         private readonly string $appPath,
         private readonly string $dotenvPath,
@@ -47,9 +52,11 @@ class ApplicationBuilder
         $containerBuilder = $this->createContainerBuilder();
         $configuration = $this->createConfiguration();
 
+        $moduleManager = new DefaultModuleManager();
         $modulesConfigurator = $this->createModulesConfigurator(
             $containerBuilder,
             $configuration,
+            $moduleManager,
         );
         $modulesConfigurator->preconfigure();
         $configurationErrors = $configuration->validate();
@@ -60,6 +67,7 @@ class ApplicationBuilder
 
         $containerBuilder->addDefinitions([
             Configuration::class => static fn () => $configuration,
+            ModuleManager::class => static fn () => $moduleManager,
         ]);
         $modulesConfigurator->boot();
         $container = $containerBuilder->build();
@@ -67,7 +75,6 @@ class ApplicationBuilder
         AppFactory::setContainer($container);
         $slimApp = AppFactory::create();
         $container->set(App::class, $slimApp);
-        $this->configureSlim($slimApp, $configuration);
 
         $serverFactory = $container->get(ServerFactory::class);
         $server = $serverFactory->createServer();
@@ -91,6 +98,7 @@ class ApplicationBuilder
         $container->set(Application::class, $app);
 
         $modulesConfigurator->afterContainerBuilt($container);
+        $this->configureSlim($slimApp, $configuration);
 
         return $app;
     }
@@ -123,12 +131,14 @@ class ApplicationBuilder
     protected function createModulesConfigurator(
         ContainerBuilder $containerBuilder,
         Configuration $configuration,
+        DefaultModuleManager $moduleManager,
     ): ModulesConfigurator
     {
         return new ModulesConfigurator(
             $configuration,
             $containerBuilder,
             $this->bootstrappers,
+            $moduleManager,
         );
     }
 

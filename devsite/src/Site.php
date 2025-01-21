@@ -3,6 +3,7 @@
 namespace Romanzaycev\Devsite;
 
 use DI\ContainerBuilder;
+use Romanzaycev\Fundamenta\Bootstrappers\Admin;
 use Romanzaycev\Fundamenta\Bootstrappers\Auth;
 use Romanzaycev\Fundamenta\Bootstrappers\Eav;
 use Romanzaycev\Fundamenta\Bootstrappers\Slim;
@@ -36,6 +37,7 @@ class Site extends \Romanzaycev\Fundamenta\ModuleBootstrapper
     public static function requires(): array
     {
         return [
+            Admin::class,
             Eav::class,
             Auth::class,
             Slim::class,

@@ -6,6 +6,9 @@ use Romanzaycev\Fundamenta\Components\Auth\Token;
 
 readonly class SessionToken implements Token
 {
+    /**
+     * @param mixed[] $payload
+     */
     public function __construct(
         private string $id,
         private array $payload,

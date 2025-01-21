@@ -16,9 +16,22 @@ require dirname(__DIR__) . "/vendor/autoload.php";
         dirname(__DIR__),
         __DIR__,
         new ArrayLoader([
+            "admin" => [
+                "security" => [
+                    "allowed_hosts" => [
+                        "localhost",
+                    ],
+                ],
+            ],
+            "slim" => [
+                "error_middleware" => [
+                    "display_error_details" => true,
+                ],
+            ],
             "openswoole" => [
                 "settings" => [
                     "document_root" => __DIR__ . "/public",
+                    "max_request" => 1,
                 ],
             ],
             "tooolooop" => [

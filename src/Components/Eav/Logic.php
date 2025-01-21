@@ -10,6 +10,9 @@ use Romanzaycev\Fundamenta\Components\Eav\QueryBuilder\LogicCompiler;
  */
 readonly class Logic
 {
+    /**
+     * @param array<string|int, Logic|mixed> $where
+     */
     public function __construct(
         private string $op,
         private array $where,
