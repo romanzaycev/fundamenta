@@ -9,7 +9,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Romanzaycev\Fundamenta\Configuration;
 use Slim\Exception\HttpNotFoundException;
 
-class HostGuardMiddleware implements MiddlewareInterface
+class AdminBaseGuard implements MiddlewareInterface
 {
     /** @var string[] */
     private array $allowedHosts;
@@ -42,14 +42,12 @@ class HostGuardMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->isEnabled) {
-            $path = $request->getRequestTarget();
+            if ($this->isPathMatched($request->getRequestTarget())) {
+                $host = $this->normalizeHost($request->getHeaderLine("Host"));
 
-            // FIXME
-
-            $host = $this->normalizeHost($request->getHeaderLine("Host"));
-
-            if (!in_array($host, $this->allowedHosts, true)) {
-                throw new HttpNotFoundException($request);
+                if (!in_array($host, $this->allowedHosts, true)) {
+                    throw new HttpNotFoundException($request);
+                }
             }
         }
 
@@ -58,13 +56,24 @@ class HostGuardMiddleware implements MiddlewareInterface
 
     private function normalizeHost(string $host): string
     {
-        $host = mb_strtolower($host);
+        $host = \mb_strtolower($host);
 
-        if (str_contains($host, ":")) {
+        if (\str_contains($host, ":")) {
             $tmp = explode(":", $host);
             $host = $tmp[0];
         }
 
         return $host;
+    }
+
+    private function isPathMatched(string $requestTarget): bool
+    {
+        foreach ($this->basePaths as $basePath) {
+            if (\str_starts_with($requestTarget, $basePath)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -13,7 +13,7 @@ use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSource;
 use Romanzaycev\Fundamenta\Components\Auth\TransportSource;
 use Romanzaycev\Fundamenta\Exceptions\Domain\EntityNotFoundException;
 
-class AuthMiddleware implements MiddlewareInterface
+class AuthedContextMiddleware implements MiddlewareInterface
 {
     public const AUTH_CONTEXT_ATTRIBUTE = "auth_context";
 

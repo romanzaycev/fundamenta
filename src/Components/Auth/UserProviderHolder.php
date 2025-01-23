@@ -2,23 +2,10 @@
 
 namespace Romanzaycev\Fundamenta\Components\Auth;
 
-class UserProviderHolder
+interface UserProviderHolder
 {
-    /**
-     * @var UserProvider[]
-     */
-    private array $providers = [];
-
     /**
      * @return UserProvider[]
      */
-    public function getProviders(): array
-    {
-        return $this->providers;
-    }
-
-    public function register(UserProvider $provider): void
-    {
-        $this->providers[$provider::class] = $provider;
-    }
+    public function getProviders(): array;
 }

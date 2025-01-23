@@ -5,7 +5,7 @@ namespace Romanzaycev\Fundamenta\Components\Http\Static;
 class File implements InternalStaticFileInterface
 {
     /**
-     * @var callable|null
+     * @var (callable(string, File): string)|null
      */
     private $preprocessor = null;
 
@@ -31,7 +31,7 @@ class File implements InternalStaticFileInterface
     public function preprocess(string $content): ?string
     {
         if ($this->isPreprocessed()) {
-            return call_user_func($this->preprocessor, $this, $content);
+            return call_user_func($this->preprocessor, $content, $this);
         }
 
         return null;
@@ -42,8 +42,14 @@ class File implements InternalStaticFileInterface
         return $this->preprocessor !== null;
     }
 
-    public function setPreprocessor(?callable $preprocessor): void
+    /**
+     * @param (callable(string, File): string)|null $preprocessor
+     * @return File
+     */
+    public function setPreprocessor(?callable $preprocessor): self
     {
         $this->preprocessor = $preprocessor;
+
+        return $this;
     }
 }

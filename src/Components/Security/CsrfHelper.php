@@ -22,7 +22,7 @@ final class CsrfHelper
         return $token;
     }
 
-    public static function remove(SessionInterface $session): void
+    public static function removeFrom(SessionInterface $session): void
     {
         $session->remove("csrf-token");
     }

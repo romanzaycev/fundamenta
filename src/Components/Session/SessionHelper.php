@@ -7,7 +7,7 @@ use PSR7Sessions\Storageless\Session\SessionInterface;
 
 final class SessionHelper
 {
-    public static function getSession(ServerRequestInterface $request): SessionInterface
+    public static function getSession(ServerRequestInterface $request): ?SessionInterface
     {
         return $request->getAttribute(FndaSessionMiddleware::SESSION_ATTRIBUTE);
     }

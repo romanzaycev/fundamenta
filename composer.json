@@ -77,7 +77,7 @@
     "checks": [
       "@phplint",
       "@phpstan",
-      "@test"
+      "@test-nc"
     ]
   },
   "config": {

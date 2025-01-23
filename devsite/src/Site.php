@@ -7,6 +7,7 @@ use Romanzaycev\Fundamenta\Bootstrappers\Admin;
 use Romanzaycev\Fundamenta\Bootstrappers\Auth;
 use Romanzaycev\Fundamenta\Bootstrappers\Eav;
 use Romanzaycev\Fundamenta\Bootstrappers\Slim;
+use Romanzaycev\Fundamenta\Components\Auth\Middlewares\AuthGuardMiddleware;
 use Romanzaycev\Fundamenta\Components\Auth\Session\SessionTokenStorageProvider;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\UniversalTransportProvider;
 use Romanzaycev\Fundamenta\Configuration;
@@ -27,10 +28,14 @@ class Site extends \Romanzaycev\Fundamenta\ModuleBootstrapper
     public static function router(\Slim\App $app): void
     {
         $app->get("/test", UseCases\Test\Controller::class . ":index");
+
         $app->group("/protected", function (RouteCollectorProxy $group) {
-            $group->get("", UseCases\Protected\Controller::class . ":index");
             $group->post("", UseCases\Protected\Controller::class . ":login");
-            $group->post("/logout", UseCases\Protected\Controller::class . ":logout");
+            $group->get("", UseCases\Protected\Controller::class . ":index");
+
+            $group->group("", function (RouteCollectorProxy $group) {
+                $group->post("/logout", UseCases\Protected\Controller::class . ":logout");
+            })->add(AuthGuardMiddleware::class);
         });
     }
 

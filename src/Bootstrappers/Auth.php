@@ -6,19 +6,21 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Http\Message\ServerRequestInterface;
 use Romanzaycev\Fundamenta\Components\Auth\Lifecycle;
-use Romanzaycev\Fundamenta\Components\Auth\Middlewares\AuthMiddleware;
+use Romanzaycev\Fundamenta\Components\Auth\Middlewares\AuthedContextMiddleware;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageHolder;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
 use Romanzaycev\Fundamenta\Components\Auth\TokenTransportHolder;
 use Romanzaycev\Fundamenta\Components\Auth\TokenTransportProvider;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\CookieTransport;
 use Romanzaycev\Fundamenta\Components\Auth\UserProvider;
+use Romanzaycev\Fundamenta\Components\Auth\DefaultUserProviderHolder;
 use Romanzaycev\Fundamenta\Components\Auth\UserProviderHolder;
 use Romanzaycev\Fundamenta\Components\Startup\HookManager;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
 use function DI\autowire;
+use function DI\get;
 
 class Auth extends ModuleBootstrapper
 {
@@ -58,6 +60,7 @@ class Auth extends ModuleBootstrapper
         $builder->addDefinitions([
             TokenStorageHolder::class => autowire(TokenStorageHolder::class),
             TokenTransportHolder::class => autowire(TokenTransportHolder::class),
+            UserProviderHolder::class => get(DefaultUserProviderHolder::class),
         ]);
     }
 
@@ -77,12 +80,11 @@ class Auth extends ModuleBootstrapper
         );
     }
 
-    /** @noinspection PhpParameterNameChangedDuringInheritanceInspection */
     public static function provisioning(
-        TokenStorageHolder $storageHolder,
-        TokenTransportHolder $transportHolder,
-        UserProviderHolder $userProviderHolder,
-        Container $container,
+        TokenStorageHolder        $storageHolder,
+        TokenTransportHolder      $transportHolder,
+        DefaultUserProviderHolder $userProviderHolder,
+        Container                 $container,
     ): array
     {
         return [
@@ -146,7 +148,6 @@ class Auth extends ModuleBootstrapper
         ];
     }
 
-    /** @noinspection PhpParameterNameChangedDuringInheritanceInspection */
     /**
      * @throws \Exception
      */
@@ -158,7 +159,7 @@ class Auth extends ModuleBootstrapper
     {
         if ($configuration->get("auth.enabled", false)) {
             return [
-                new AuthMiddleware(
+                new AuthedContextMiddleware(
                     $storageHolder,
                     $transportHolder,
                     $configuration->get("auth.storage"),

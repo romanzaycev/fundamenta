@@ -61,9 +61,10 @@ class HttpErrorHandler extends ErrorHandler
 
         $contentType = $this->determineContentType($this->request);
 
-        if ($contentType === "text/html") {
+        if ($contentType === null || $contentType === "text/html") {
             $statusCode = (int)$statusCode;
             $body = $this->createHtmlError($answer, $statusCode);
+            $contentType = "text/html";
         } else {
             $body = \json_encode((object)$answer, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         }

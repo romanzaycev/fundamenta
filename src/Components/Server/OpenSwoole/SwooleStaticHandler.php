@@ -2,6 +2,7 @@
 
 namespace Romanzaycev\Fundamenta\Components\Server\OpenSwoole;
 
+use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Http\Static\InternalStaticDirectoryInterface;
 use Romanzaycev\Fundamenta\Components\Http\Static\InternalStaticFileInterface;
 use Romanzaycev\Fundamenta\Components\Http\Static\StaticHandler;
@@ -15,6 +16,10 @@ class SwooleStaticHandler implements StaticHandler
     /** @var InternalStaticDirectoryInterface[] */
     private array $directories = [];
 
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {}
+
     public function add(InternalStaticFileInterface|InternalStaticDirectoryInterface $entry): void
     {
         if ($entry instanceof InternalStaticFileInterface) {
@@ -27,28 +32,41 @@ class SwooleStaticHandler implements StaticHandler
 
     public function tryRespond(string $requestPath, Response $response): bool
     {
-        $requestPath = trim($requestPath);
+        try {
+            $requestPath = $this->normalizePath($requestPath);
 
-        if (str_ends_with($requestPath, ".php")) {
-            return false;
+            if (str_ends_with($requestPath, ".php")) {
+                return false;
+            }
+
+            if (isset($this->files[$requestPath])) {
+                $this->respondFile($this->files[$requestPath], $response);
+
+                return true;
+            }
+
+            foreach ($this->directories as $probRequestedDir => $directory) {
+                if (str_starts_with($requestPath, $probRequestedDir)) {
+                    $this->respondFileFromDirectory(
+                        $directory,
+                        mb_substr($requestPath, mb_strlen($probRequestedDir)),
+                        $response,
+                    );
+
+                    return true;
+                }
+            }
+        } catch (\Throwable $e) {
+            $this
+                ->logger
+                ->error(
+                    "[SwooleStaticHandler] TryRespond error:" . $e->getMessage(),
+                    [
+                        "exception" => $e,
+                        "requestPath" => $requestPath,
+                    ]
+                );
         }
-
-        if (isset($this->files[$requestPath])) {
-            $this->respondFile($this->files[$requestPath], $response);
-
-            return true;
-        }
-
-        $requestedFile = pathinfo($requestPath, PATHINFO_BASENAME);
-        $probRequestedDir = preg_replace("/\/" . $requestedFile . "$/", "", $requestPath);
-
-        if (isset($this->directories[$probRequestedDir])) {
-            $this->respondFileFromDirectory($this->directories[$probRequestedDir], $requestedFile, $response);
-
-            return true;
-        }
-
-        // @TODO: handle index files
 
         return false;
     }
@@ -68,14 +86,14 @@ class SwooleStaticHandler implements StaticHandler
     {
         $realPath = realpath($file->getRealFile());
 
-        if (!$file->isPreprocessed()) {
-            $this->sendfile($realPath, $response);
-            return;
-        }
-
         if (!$realPath || !is_file($realPath)) {
             $response->status(404);
             $response->end();
+            return;
+        }
+
+        if (!$file->isPreprocessed()) {
+            $this->sendfile($realPath, $response);
             return;
         }
 

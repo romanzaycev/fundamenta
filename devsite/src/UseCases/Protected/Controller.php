@@ -4,8 +4,7 @@ namespace Romanzaycev\Devsite\UseCases\Protected;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Romanzaycev\Fundamenta\Components\Auth\Context;
-use Romanzaycev\Fundamenta\Components\Auth\Middlewares\AuthMiddleware;
+use Romanzaycev\Fundamenta\Components\Auth\AuthHelper;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\CookieTransport;
 use Romanzaycev\Fundamenta\Components\Http\HttpHelper;
 use Romanzaycev\Fundamenta\Components\Security\CsrfHelper;
@@ -24,20 +23,13 @@ readonly class Controller
      */
     public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        /** @var Context $authContext */
-        $authContext = $request->getAttribute(AuthMiddleware::AUTH_CONTEXT_ATTRIBUTE);
-
-        if (!$authContext || !$authContext->getToken()) {
-            return $response->withBody($this->view->renderStream("protected/main.t.php", [
-                "is_authorized" => false,
-            ]))->withStatus(401);
-        }
+        $isAuthorized = AuthHelper::isAuthorized($request);
 
         return $response->withBody($this->view->renderStream("protected/main.t.php", [
-            "is_authorized" => true,
-            "login" => $authContext->getToken()->getPayload()["login"],
+            "is_authorized" => $isAuthorized,
+            "login" => AuthHelper::getContext($request)?->getToken()?->getPayload()["login"],
             "csrf_token" => CsrfHelper::ensureToken(SessionHelper::getSession($request)),
-        ]));
+        ]))->withStatus($isAuthorized ? 200 : 401);
     }
 
     /**
@@ -45,10 +37,7 @@ readonly class Controller
      */
     public function login(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        /** @var Context $authContext */
-        $authContext = $request->getAttribute(AuthMiddleware::AUTH_CONTEXT_ATTRIBUTE);
-
-        if ($authContext && $authContext->getToken()) {
+        if (AuthHelper::isAuthorized($request)) {
             return HttpHelper::redirect("/protected");
         }
 
@@ -63,6 +52,7 @@ readonly class Controller
             ]))->withStatus(401);
         }
 
+        $authContext = AuthHelper::getContext($request);
         $authContext->start($authContext->getStorage()->create([
             "login" => $login,
         ], (new \DateTimeImmutable())->add(new \DateInterval("PT24H"))), CookieTransport::class);
@@ -75,13 +65,7 @@ readonly class Controller
      */
     public function logout(ServerRequestInterface $request, ResponseInterface $response):ResponseInterface
     {
-        /** @var Context $authContext */
-        $authContext = $request->getAttribute(AuthMiddleware::AUTH_CONTEXT_ATTRIBUTE);
-
-        if (!$authContext || !$authContext->getToken()) {
-            return $response->withStatus(401);
-        }
-
+        $authContext = AuthHelper::getContext($request);
         $session = SessionHelper::getSession($request);
 
         if (!CsrfHelper::validate($request, $session)) {
@@ -89,7 +73,7 @@ readonly class Controller
         }
 
         $authContext->close();
-        CsrfHelper::remove($session);
+        CsrfHelper::removeFrom($session);
 
         return HttpHelper::redirect("/protected", response: $response);
     }

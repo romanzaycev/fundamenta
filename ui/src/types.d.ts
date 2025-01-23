@@ -19,10 +19,9 @@ export enum FndaAppEnv {
 interface FndaAdminUiGlobals {
     env: {
         APP_ENV: FndaAppEnv | string,
-        API_BASE_URI: string,
+        API_BASE_PATH: string,
         ROUTER_BASE_PATH: string,
     },
-    version: string,
 }
 
 declare global {
