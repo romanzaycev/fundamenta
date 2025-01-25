@@ -7,9 +7,9 @@ use OpenSwoole\Server;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterPipeline;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\OpenSwooleHelper;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
-use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\SwooleStaticHandler;
 use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
 use Romanzaycev\Fundamenta\Components\Startup\DefaultModuleManager;
 use Romanzaycev\Fundamenta\Components\Startup\HookManager;
@@ -90,8 +90,7 @@ class ApplicationBuilder
 
                 return $result;
             },
-            $configuration,
-            $container->get(SwooleStaticHandler::class),
+            $container->get(FilterPipeline::class),
         );
 
         $app = $this->createApplication($server);

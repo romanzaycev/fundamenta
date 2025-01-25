@@ -7,6 +7,10 @@ use DI\ContainerBuilder;
 use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Configuration\Env;
 use Romanzaycev\Fundamenta\Components\Http\Static\StaticHandler;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterCollection;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterPipeline;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\Filters\Favicon;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\Filters\StaticFiles;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\SwooleStaticHandler;
 use Romanzaycev\Fundamenta\Configuration;
@@ -63,7 +67,21 @@ class OpenSwoole extends ModuleBootstrapper
             },
             StaticHandler::class => autowire(SwooleStaticHandler::class),
             SwooleStaticHandler::class => get(StaticHandler::class),
+            FilterPipeline::class => autowire(FilterPipeline::class),
+            FilterCollection::class => get(FilterPipeline::class),
         ]);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function booted(FilterPipeline $pipeline, Configuration $configuration): void
+    {
+        if ($configuration->get("openswoole.misc.ignore_favicon", true)) {
+            $pipeline->add(Favicon::class);
+        }
+
+        $pipeline->add(StaticFiles::class);
     }
 
     public static function requires(): array

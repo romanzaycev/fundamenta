@@ -100,7 +100,11 @@ class SwooleStaticHandler implements StaticHandler
         $response->end($file->preprocess(file_get_contents($realPath)));
     }
 
-    private function respondFileFromDirectory(InternalStaticDirectoryInterface $dir, string $requestedFile, Response $response): void
+    private function respondFileFromDirectory(
+        InternalStaticDirectoryInterface $dir,
+        string $requestedFile,
+        Response $response,
+    ): void
     {
         $this->sendfile(realpath($dir->getRealDirectory() . "/" . $requestedFile), $response);
     }
