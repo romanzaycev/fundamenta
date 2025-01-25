@@ -3,19 +3,22 @@
 namespace Romanzaycev\Fundamenta\Components\Admin\Bootstrapping;
 
 use Psr\Log\LoggerInterface;
+use Romanzaycev\Fundamenta\Components\Admin\Security\AdminBaseGuard;
 use Romanzaycev\Fundamenta\Components\Configuration\Env;
 use Romanzaycev\Fundamenta\Components\Http\Static\Directory;
 use Romanzaycev\Fundamenta\Components\Http\Static\File;
 use Romanzaycev\Fundamenta\Components\Http\Static\StaticHandler;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterCollection;
 use Romanzaycev\Fundamenta\Configuration;
 
 final readonly class UiStaticHelper
 {
     public function __construct(
-        private StaticHandler   $staticHandler,
-        private Configuration   $configuration,
-        private LoggerInterface $logger,
-        private string          $resourcesDir,
+        private StaticHandler    $staticHandler,
+        private Configuration    $configuration,
+        private LoggerInterface  $logger,
+        private FilterCollection $filterCollection,
+        private string           $resourcesDir,
     ) {}
 
     public function configure(): void
@@ -43,7 +46,7 @@ final readonly class UiStaticHelper
                             $basePath,
                             $apiBasePath,
                         )
-                    ), // FIXME: Add middleware for OpenSwoole for host checking
+                    ),
                 new File(
                     $basePath . "/app.css",
                     $this->resourcesDir . "/app.css",
@@ -65,6 +68,12 @@ final readonly class UiStaticHelper
             foreach ($uiFiles as $uiFile) {
                 $this->staticHandler->add($uiFile);
             }
+
+            $this
+                ->filterCollection
+                ->add(
+                    AdminBaseGuard::class,
+                );
         }
     }
 

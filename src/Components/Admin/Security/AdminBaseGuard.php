@@ -2,14 +2,17 @@
 
 namespace Romanzaycev\Fundamenta\Components\Admin\Security;
 
+use OpenSwoole\Http\Request;
+use OpenSwoole\Http\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterInterface;
 use Romanzaycev\Fundamenta\Configuration;
 use Slim\Exception\HttpNotFoundException;
 
-class AdminBaseGuard implements MiddlewareInterface
+class AdminBaseGuard implements MiddlewareInterface, FilterInterface
 {
     /** @var string[] */
     private array $allowedHosts;
@@ -52,6 +55,28 @@ class AdminBaseGuard implements MiddlewareInterface
         }
 
         return $handler->handle($request);
+    }
+
+    public function handle(Request $request, Response $response, \Romanzaycev\Fundamenta\Components\Server\OpenSwoole\RequestHandlerInterface $handler): void
+    {
+        if ($this->isEnabled) {
+            if ($this->isPathMatched($request->server["request_uri"])) {
+                $host = $this->normalizeHost($request->header["host"] ?? '');
+
+                if (!in_array($host, $this->allowedHosts, true)) {
+                    $response->status(404);
+                    $response->end();
+                    return;
+                }
+            }
+        }
+
+        $handler->handle($request, $response);
+    }
+
+    public function getSorting(): int
+    {
+        return -1;
     }
 
     private function normalizeHost(string $host): string
