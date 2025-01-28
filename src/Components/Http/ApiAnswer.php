@@ -2,4 +2,6 @@
 
 namespace Romanzaycev\Fundamenta\Components\Http;
 
-interface ApiAnswer extends \JsonSerializable {}
+interface ApiAnswer extends \JsonSerializable {
+    public function getStatusCode(): int;
+}

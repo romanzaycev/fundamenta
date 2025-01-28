@@ -4,15 +4,16 @@ namespace Romanzaycev\Fundamenta\Bootstrappers;
 
 use DI\Container;
 use DI\ContainerBuilder;
+use Romanzaycev\Fundamenta\Components\Admin\Bootstrapping\AdminTokenStorage;
 use Romanzaycev\Fundamenta\Components\Admin\Bootstrapping\PermissionsProvider;
 use Romanzaycev\Fundamenta\Components\Admin\Bootstrapping\RolesProvider;
+use Romanzaycev\Fundamenta\Components\Admin\Bootstrapping\Routing;
 use Romanzaycev\Fundamenta\Components\Admin\Bootstrapping\UiStaticHelper;
+use Romanzaycev\Fundamenta\Components\Admin\Providers\PgsqlUserProvider;
 use Romanzaycev\Fundamenta\Components\Admin\Security\AdminBaseGuard;
-use Romanzaycev\Fundamenta\Components\Rbac\Middlewares\PermissionGuardMiddleware;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\ModuleBootstrapper;
 use Slim\App;
-use Slim\Routing\RouteCollectorProxy;
 use function DI\autowire;
 
 class Admin extends ModuleBootstrapper
@@ -24,10 +25,13 @@ class Admin extends ModuleBootstrapper
             [
                 "paths" => [
                     "ui_base_path" => "/panel",
-                    "ui_api_base_path" => "/panel/api",
+                    "ui_api_base_path" => "/panelapi",
                 ],
                 "security" => [
                     "allowed_hosts" => [],
+                    "auth" => [
+                        "ttl" => "PT24H",
+                    ],
                 ],
                 "rbac" => [
                     RolesProvider::ADMINISTRATOR => [
@@ -36,6 +40,14 @@ class Admin extends ModuleBootstrapper
                     RolesProvider::EDITOR => [
                         PermissionsProvider::ADMIN_LOGIN,
                     ],
+                ],
+                "providers" => [
+                    "user" => [
+                        "pgsql" => [
+                            "schema" => "public",
+                            "table" => "admin_users",
+                        ],
+                    ]
                 ],
             ],
             [
@@ -50,8 +62,11 @@ class Admin extends ModuleBootstrapper
     public static function boot(ContainerBuilder $builder, Configuration $configuration): void
     {
         $builder->addDefinitions([
+            Routing::class => autowire(Routing::class),
+            AdminTokenStorage::class => autowire(AdminTokenStorage::class),
             RolesProvider::class => autowire(RolesProvider::class),
             PermissionsProvider::class => autowire(PermissionsProvider::class),
+            PgsqlUserProvider::class => autowire(PgsqlUserProvider::class),
         ]);
     }
 
@@ -75,20 +90,10 @@ class Admin extends ModuleBootstrapper
 
     public static function router(
         App $app,
-        Configuration $configuration,
-        PermissionGuardMiddleware $permissionGuardMiddleware,
+        Routing $routing,
     ): void
     {
-        $app
-            ->group(
-                $configuration->get("admin.paths.ui_api_base_path"),
-                function (RouteCollectorProxy $proxy) {
-                    // FIXME
-                }
-            )
-            ->addMiddleware(
-                $permissionGuardMiddleware->withPermission(PermissionsProvider::ADMIN_LOGIN),
-            );
+        $routing->configure($app);
     }
 
     public static function requires(): array

@@ -3,6 +3,7 @@
 namespace Romanzaycev\Fundamenta\Components\Http;
 
 use Nyholm\Psr7\Response;
+use Nyholm\Psr7\Stream;
 use Psr\Http\Message\ResponseInterface;
 
 final class HttpHelper
@@ -18,15 +19,16 @@ final class HttpHelper
     /**
      * @throws \JsonException
      */
-    public static function json(array | \JsonSerializable $body, int $status = 200): Response
+    public static function json(array | \JsonSerializable $body, int $status = 200, ?ResponseInterface $response = null): ResponseInterface
     {
-        return new Response(
-            $status,
-            [
-                "Content-Type" => "application/json",
-            ],
-            json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
-        );
+        if (!$response) {
+            $response = new Response($status);
+        }
+
+        return $response
+            ->withHeader("Content-Type", "application/json")
+            ->withBody(Stream::create(json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)))
+        ;
     }
 
     public static function redirect(
@@ -52,5 +54,19 @@ final class HttpHelper
         }
 
         return '';
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    public static function respond(ApiAnswer $answer, ?ResponseInterface $response = null): ResponseInterface
+    {
+        return self::json(
+            $answer,
+            $response
+                ? $response->getStatusCode()
+                : $answer->getStatusCode(),
+            $response,
+        );
     }
 }

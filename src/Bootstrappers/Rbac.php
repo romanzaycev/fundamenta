@@ -4,6 +4,7 @@ namespace Romanzaycev\Fundamenta\Bootstrappers;
 
 use DI\ContainerBuilder;
 use Romanzaycev\Fundamenta\Components\Rbac\GenericRbacManager;
+use Romanzaycev\Fundamenta\Components\Rbac\Middlewares\PermissionGuardMiddleware;
 use Romanzaycev\Fundamenta\Components\Rbac\PermissionHolder;
 use Romanzaycev\Fundamenta\Components\Rbac\PermissionProvider;
 use Romanzaycev\Fundamenta\Components\Rbac\PermissionRepository;
@@ -39,6 +40,7 @@ class Rbac extends ModuleBootstrapper
         $builder->addDefinitions([
             RbacManager::class => autowire(GenericRbacManager::class),
             GenericRbacManager::class => get(RbacManager::class),
+            PermissionGuardMiddleware::class => autowire(PermissionGuardMiddleware::class),
         ]);
     }
 

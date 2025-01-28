@@ -5,7 +5,7 @@
   "main": "ui/app.ts",
   "scripts": {
     "build": "node build-ui.js",
-    "dev": "node build.js --watch"
+    "dev": "node build-ui.js --watch"
   },
   "author": "Roman Zaycev <box@romanzaycev.ru>",
   "license": "MIT",

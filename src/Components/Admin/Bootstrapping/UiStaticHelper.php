@@ -36,17 +36,6 @@ final readonly class UiStaticHelper
             $basePath = $this->configuration->get("admin.paths.ui_base_path");
             $apiBasePath = $this->configuration->get("admin.paths.ui_api_base_path");
             $uiFiles = [
-                (new File(
-                    $basePath,
-                    $this->resourcesDir . "/index.html",
-                ))
-                    ->setPreprocessor(
-                        static fn (string $content): string => self::preprocessIndex(
-                            $content,
-                            $basePath,
-                            $apiBasePath,
-                        )
-                    ),
                 new File(
                     $basePath . "/app.css",
                     $this->resourcesDir . "/app.css",
@@ -63,6 +52,18 @@ final readonly class UiStaticHelper
                     $basePath . "/assets",
                     $this->resourcesDir . "/assets",
                 ),
+                (new File(
+                    $basePath,
+                    $this->resourcesDir . "/index.html",
+                ))
+                    ->setPreprocessor(
+                        static fn (string $content): string => self::preprocessIndex(
+                            $content,
+                            $basePath,
+                            $apiBasePath,
+                        )
+                    )
+                    ->asVirtualRewrite(true),
             ];
 
             foreach ($uiFiles as $uiFile) {

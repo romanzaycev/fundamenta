@@ -16,4 +16,9 @@ interface TokenStorageSource
      * @throws EntityNotFoundException
      */
     public function getStorage(string $class): TokenStorage;
+
+    /**
+     * @return class-string<TokenStorage>[]
+     */
+    public function getClasses(): array;
 }

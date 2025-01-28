@@ -16,6 +16,19 @@ final class AuthHelper
     {
         $ctx = self::getContext($request);
 
-        return $ctx && $ctx->getToken() && !$ctx->isClosed();
+        return $ctx
+            && !$ctx->isClosed()
+            && $ctx->getToken()
+            && $ctx->getToken()->expiresAt() > new \DateTimeImmutable()
+        ;
+    }
+
+    public static function getToken(ServerRequestInterface $request): ?Token
+    {
+        if (self::isAuthorized($request)) {
+            return self::getContext($request)->getToken();
+        }
+
+        return null;
     }
 }

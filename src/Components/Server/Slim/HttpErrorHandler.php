@@ -4,11 +4,11 @@ namespace Romanzaycev\Fundamenta\Components\Server\Slim;
 
 use Psr\Http\Message\ResponseInterface;
 use Romanzaycev\Fundamenta\Components\Http\HttpHelper;
-use Romanzaycev\Fundamenta\Exceptions\Domain\EntityNotFoundException;
+use Romanzaycev\Fundamenta\Exceptions\Domain\AccessDeniedException;use Romanzaycev\Fundamenta\Exceptions\Domain\EntityNotFoundException;
 use Romanzaycev\Fundamenta\Exceptions\Domain\InvalidParamsException;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpException;
-use Slim\Exception\HttpNotFoundException;
+use Slim\Exception\HttpForbiddenException;use Slim\Exception\HttpNotFoundException;
 use Slim\Handlers\ErrorHandler;
 
 class HttpErrorHandler extends ErrorHandler
@@ -56,7 +56,7 @@ class HttpErrorHandler extends ErrorHandler
         ];
 
         if ($this->displayErrorDetails) {
-            $answer["trace"] = $exception->getTraceAsString();
+            $answer["trace"] = $this->hidePathFromTrace($exception->getTraceAsString());
         }
 
         $contentType = $this->determineContentType($this->request);
@@ -93,48 +93,15 @@ class HttpErrorHandler extends ErrorHandler
             );
         }
 
-        return $exception;
-    }
-
-    /**
-     * @param array{message: string, trace: ?string} $answer
-     */
-    private function createHtmlError(array $answer, int $statusCode): string
-    {
-        ob_start();?><!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Error <?=$statusCode?>: <?=HttpHelper::getReasonPhrase($statusCode)?></title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        if ($exception instanceof AccessDeniedException) {
+            return new HttpForbiddenException(
+                $this->request,
+                $exception->getMessage(),
+                $exception,
+            );
         }
-    </style>
-</head>
-<body>
-    <h1>Error <?=$statusCode?>: <?=HttpHelper::getReasonPhrase($statusCode)?></h1>
 
-    <?php if ($answer["message"]): ?>
-        <p><?=htmlspecialchars($answer["message"])?></p>
-    <?php endif; ?>
-
-    <?php if (isset($answer["trace"])): ?>
-        <h3>Trace:</h3>
-
-        <code style="font-size: 80%; line-height: 80%">
-            <?php foreach (explode("\n", $answer["trace"]) as $line): ?>
-                <p><?=htmlspecialchars($this->hidePath($line))?></p>
-            <?php endforeach; ?>
-        </code>
-    <?php endif; ?>
-</body>
-</html><?php
-
-        return ob_get_clean();
+        return $exception;
     }
 
     private function hidePath(string $traceLine): string
@@ -168,5 +135,57 @@ class HttpErrorHandler extends ErrorHandler
         }
 
         return '';
+    }
+
+    private function hidePathFromTrace(string $traceString): string
+    {
+        return implode(
+            "\n",
+            array_map(
+                $this->hidePath(...),
+                explode("\n", $traceString),
+            ),
+        );
+    }
+
+    /**
+     * @param array{message: string, trace: ?string} $answer
+     */
+    private function createHtmlError(array $answer, int $statusCode): string
+    {
+        ob_start();?><!doctype html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport"
+                  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+            <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <title>Error <?=$statusCode?>: <?=HttpHelper::getReasonPhrase($statusCode)?></title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Error <?=$statusCode?>: <?=HttpHelper::getReasonPhrase($statusCode)?></h1>
+
+            <?php if ($answer["message"]): ?>
+                <p><?=htmlspecialchars($answer["message"])?></p>
+            <?php endif; ?>
+
+            <?php if (isset($answer["trace"])): ?>
+                <h3>Trace:</h3>
+
+                <code style="font-size: 80%; line-height: 80%">
+                    <?php foreach (explode("\n", $answer["trace"]) as $line): ?>
+                        <p><?=htmlspecialchars($this->hidePath($line))?></p>
+                    <?php endforeach; ?>
+                </code>
+            <?php endif; ?>
+        </body>
+        </html><?php
+
+        return ob_get_clean();
     }
 }

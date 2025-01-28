@@ -63,7 +63,7 @@ readonly class Controller
     /**
      * @throws \Throwable
      */
-    public function logout(ServerRequestInterface $request, ResponseInterface $response):ResponseInterface
+    public function logout(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $authContext = AuthHelper::getContext($request);
         $session = SessionHelper::getSession($request);

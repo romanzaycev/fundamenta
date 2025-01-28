@@ -2,30 +2,46 @@
 
 namespace Romanzaycev\Fundamenta\Components\Http;
 
-readonly class GenericApiAnswer implements ApiAnswer
+class GenericApiAnswer implements ApiAnswer
 {
     public function __construct(
-        private bool $isSuccess,
-        private ?string $message = null,
-        private ?array $data = null,
+        protected bool $isSuccess,
+        protected ?string $message = null,
+        protected ?array $data = null,
+        protected ?int $statusCode = null,
     ) {}
 
-    public static function success(?array $data = null, ?string $message = "Successful action"): self
+    public static function success(?array $data = null, ?string $message = "Successful action", int $statusCode = 200): self
     {
         return new self(
             true,
             $message,
             $data,
+            $statusCode,
         );
     }
 
-    public static function fail(?string $message = "Failed action", ?array $data = null): self
+    public static function fail(?string $message = "Failed action", ?array $data = null, int $statusCode = 500): self
     {
         return new self(
             false,
             $message,
             $data,
+            $statusCode,
         );
+    }
+
+    public function getStatusCode(): int
+    {
+        if ($this->statusCode !== null) {
+            return $this->statusCode;
+        }
+
+        if ($this->isSuccess) {
+            return 200;
+        }
+
+        return 500;
     }
 
     public function jsonSerialize(): array

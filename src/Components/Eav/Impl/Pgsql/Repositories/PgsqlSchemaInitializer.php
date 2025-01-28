@@ -37,19 +37,19 @@ class PgsqlSchemaInitializer implements SchemaInitializerInterface
             return;
         }
 
-        if (!$this->isTableExists($this->database, $this->typesTable)) {
+        if (!$this->isTableExists($this->database, $this->schema, $this->typesTable)) {
             $this->creatTypesTable();
         }
 
-        if (!$this->isTableExists($this->database, $this->entitiesTable)) {
+        if (!$this->isTableExists($this->database, $this->schema, $this->entitiesTable)) {
             $this->creatEntitiesTable();
         }
 
-        if (!$this->isTableExists($this->database, $this->attributesTable)) {
+        if (!$this->isTableExists($this->database, $this->schema, $this->attributesTable)) {
             $this->creatAttributesTable();
         }
 
-        if (!$this->isTableExists($this->database, $this->valuesTable)) {
+        if (!$this->isTableExists($this->database, $this->schema, $this->valuesTable)) {
             $this->createValuesTable();
         }
 

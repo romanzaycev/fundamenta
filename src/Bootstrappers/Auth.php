@@ -9,6 +9,7 @@ use Romanzaycev\Fundamenta\Components\Auth\Lifecycle;
 use Romanzaycev\Fundamenta\Components\Auth\Middlewares\AuthedContextMiddleware;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageHolder;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSelector;
 use Romanzaycev\Fundamenta\Components\Auth\TokenTransportHolder;
 use Romanzaycev\Fundamenta\Components\Auth\TokenTransportProvider;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\CookieTransport;
@@ -24,6 +25,9 @@ use function DI\get;
 
 class Auth extends ModuleBootstrapper
 {
+    /** @var TokenStorageSelector[] */
+    private static array $selectors = [];
+
     public static function preconfigure(Configuration $configuration): void
     {
         $configuration->setDefaults(
@@ -136,6 +140,18 @@ class Auth extends ModuleBootstrapper
                     foreach ($providers as $provider) {
                         $userProviderHolder->register($provider);
                     }
+                },
+            ),
+
+            new ProvisionDecl(
+                TokenStorageSelector::class,
+                static function (array $selectors): void {
+                    /** @var TokenStorageSelector[] $selectors */
+                    foreach ($selectors as $selector) {
+                        self::$selectors[] = $selector;
+                    }
+
+                    self::$selectors = array_unique(self::$selectors);
                 }
             ),
         ];
@@ -162,6 +178,7 @@ class Auth extends ModuleBootstrapper
                 new AuthedContextMiddleware(
                     $storageHolder,
                     $transportHolder,
+                    self::$selectors,
                     $configuration->get("auth.storage"),
                     $configuration->get("auth.default_transport"),
                 ),

@@ -2,22 +2,13 @@
 
 namespace Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql\Repositories\Helpers;
 
+use Romanzaycev\Fundamenta\Infrastructure\Pgsql\Helper;
+
 final class PgsqlDateHelper
 {
     public static function toNative(string $dbDate): ?\DateTimeInterface
     {
-        if (str_contains($dbDate, ".")) {
-            $tmp = explode(".", $dbDate);
-            $dbDate = $tmp[0];
-        }
-
-        if ($time = strtotime($dbDate)) {
-            if ($dt = \DateTimeImmutable::createFromFormat("U", (string)$time)) {
-                return $dt;
-            }
-        }
-
-        return null;
+        return Helper::convertDbDateToNative($dbDate);
     }
 
     public static function fromNativeAttribute(\DateTimeInterface $date): string

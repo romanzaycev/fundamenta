@@ -9,7 +9,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Romanzaycev\Fundamenta\Components\Auth\Context;
 use Romanzaycev\Fundamenta\Components\Auth\Exceptions\TokenStorageException;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorage;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSelector;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSource;
+use Romanzaycev\Fundamenta\Components\Auth\Transport\HttpTransport;
 use Romanzaycev\Fundamenta\Components\Auth\TransportSource;
 use Romanzaycev\Fundamenta\Exceptions\Domain\EntityNotFoundException;
 
@@ -18,13 +20,16 @@ class AuthedContextMiddleware implements MiddlewareInterface
     public const AUTH_CONTEXT_ATTRIBUTE = "auth_context";
 
     /**
-     * @param class-string<TokenStorage> $tokenStorageClass
+     * @param TokenStorageSelector[] $selectors
+     * @param class-string<TokenStorage> $defaultTokenStorageClass
+     * @param class-string<HttpTransport> $defaultTransport
      */
     public function __construct(
         private readonly TokenStorageSource $tokenStorageSource,
-        private readonly TransportSource $transportSource,
-        private readonly string $tokenStorageClass,
-        private readonly string $defaultTransport,
+        private readonly TransportSource    $transportSource,
+        private readonly array              $selectors,
+        private readonly string             $defaultTokenStorageClass,
+        private readonly string             $defaultTransport,
     ) {}
 
     /**
@@ -33,7 +38,11 @@ class AuthedContextMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $storage = $this->tokenStorageSource->getStorage($this->tokenStorageClass);
+        $storage = $this
+            ->tokenStorageSource
+            ->getStorage(
+                $this->selectTokenStorage($request),
+            );
         $ctx = new Context($storage, $this->defaultTransport);
         $request = $request->withAttribute(self::AUTH_CONTEXT_ATTRIBUTE, $ctx);
 
@@ -82,5 +91,18 @@ class AuthedContextMiddleware implements MiddlewareInterface
         }
 
         return $response;
+    }
+
+    private function selectTokenStorage(ServerRequestInterface $request): string
+    {
+        $classes = $this->tokenStorageSource->getClasses();
+
+        foreach ($this->selectors as $selector) {
+            if ($cl = $selector->select($request, $classes)) {
+                return $cl;
+            }
+        }
+
+        return $this->defaultTokenStorageClass;
     }
 }

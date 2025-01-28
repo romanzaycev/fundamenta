@@ -94,12 +94,6 @@ const options = commandLineArgs([
     }
 
     if (options.watch) {
-        if (false) {
-            let {host, port} = await ctx.serve({
-                servedir: 'ui-public',
-            })
-            console.log(`Server started: http://${host}:${port}/`);
-        }
         console.log('Watching...');
         await ctx.watch();
     } else {

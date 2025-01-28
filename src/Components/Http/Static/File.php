@@ -9,6 +9,8 @@ class File implements InternalStaticFileInterface
      */
     private $preprocessor = null;
 
+    private bool $isVirtualRewrite = false;
+
     public function __construct(
         private readonly string $public,
         private readonly string $real,
@@ -42,6 +44,11 @@ class File implements InternalStaticFileInterface
         return $this->preprocessor !== null;
     }
 
+    public function isVirtualRewrite(): bool
+    {
+        return $this->isVirtualRewrite;
+    }
+
     /**
      * @param (callable(string, File): string)|null $preprocessor
      * @return File
@@ -49,6 +56,13 @@ class File implements InternalStaticFileInterface
     public function setPreprocessor(?callable $preprocessor): self
     {
         $this->preprocessor = $preprocessor;
+
+        return $this;
+    }
+
+    public function asVirtualRewrite(bool $isVirtualRewrite): self
+    {
+        $this->isVirtualRewrite = $isVirtualRewrite;
 
         return $this;
     }

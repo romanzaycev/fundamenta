@@ -8,10 +8,10 @@ use Romanzaycev\Fundamenta\Exceptions\Domain\EntityNotFoundException;
 
 class TokenStorageHolder implements TokenStorageSource
 {
-    /** @var TokenStorage[] */
+    /** @var TokenStorage[]|array<string, TokenStorage> */
     private array $persistent = [];
 
-    /** @var TokenStorage[] */
+    /** @var TokenStorage[]|array<string, TokenStorage> */
     private array $forRequest = [];
 
     /** @var TokenStorageProvider[] */
@@ -36,7 +36,7 @@ class TokenStorageHolder implements TokenStorageSource
     }
 
     /**
-     * @return TokenStorage[]
+     * @return TokenStorage[]|array<string, TokenStorage>
      */
     public function getStorages(): array
     {
@@ -46,6 +46,11 @@ class TokenStorageHolder implements TokenStorageSource
     public function getStorage(string $class): TokenStorage
     {
         return $this->getStorages()[$class] ?? throw new EntityNotFoundException("Not found token storage " . $class);
+    }
+
+    public function getClasses(): array
+    {
+        return array_keys($this->getStorages());
     }
 
     public function registerForRequestProvider(TokenStorageProvider $provider): void

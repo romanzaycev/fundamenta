@@ -13,6 +13,9 @@ class Context
     /** @var class-string<HttpTransport>|null */
     private ?string $transport = null;
 
+    /**
+     * @param class-string<HttpTransport> $defaultTransport
+     */
     public function __construct(
         private readonly TokenStorage $storage,
         private readonly string $defaultTransport,
@@ -28,6 +31,7 @@ class Context
     {
         $this->token = $token;
         $this->transport = $transport;
+        $this->isClosed = false;
     }
 
     public function isClosed(): bool

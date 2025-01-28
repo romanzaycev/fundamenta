@@ -11,4 +11,6 @@ interface InternalStaticFileInterface
     public function preprocess(string $content): ?string;
 
     public function isPreprocessed(): bool;
+
+    public function isVirtualRewrite(): bool;
 }

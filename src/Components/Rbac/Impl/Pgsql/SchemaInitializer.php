@@ -30,7 +30,7 @@ class SchemaInitializer
             return;
         }
 
-        if (!$this->isTableExists($this->database, $this->rolesTable)) {
+        if (!$this->isTableExists($this->database, $this->schema, $this->rolesTable)) {
             $this->creatRolesTable();
         }
 

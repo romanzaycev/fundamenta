@@ -56,6 +56,12 @@ class SwooleStaticHandler implements StaticHandler
                     return true;
                 }
             }
+
+            if ($file = $this->isVirtualRewriteMatched($requestPath)) {
+                $this->respondFile($file, $response);
+
+                return true;
+            }
         } catch (\Throwable $e) {
             $this
                 ->logger
@@ -118,5 +124,21 @@ class SwooleStaticHandler implements StaticHandler
         }
 
         $response->sendfile($realPath);
+    }
+
+    private function isVirtualRewriteMatched(string $requestPath): ?InternalStaticFileInterface
+    {
+        foreach ($this->files as $file) {
+            if ($file->isVirtualRewrite()) {
+                $filePubPath = $file->getPublicFile();
+                $filePubPath .= "/";
+
+                if (str_starts_with($requestPath, $filePubPath)) {
+                    return $file;
+                }
+            }
+        }
+
+        return null;
     }
 }
