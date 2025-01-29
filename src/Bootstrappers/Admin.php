@@ -100,8 +100,14 @@ class Admin extends ModuleBootstrapper
     /**
      * @throws \Throwable
      */
-    public static function booted(Container $container): void
+    public static function booted(Container $container, Configuration $configuration): void
     {
+        if ($configuration->get("auth.enabled", false) === false) {
+            throw new \RuntimeException(
+                "System misconfiguration, Admin component wants `auth.enabled` === true",
+            );
+        }
+
         $resourcesDir = dirname(__DIR__, 2) . "/ui-public";
         $container
             ->make(UiStaticHelper::class, ["resourcesDir" => $resourcesDir])
