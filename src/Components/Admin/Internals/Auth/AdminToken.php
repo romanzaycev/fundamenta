@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Admin\Security;
+namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Auth;
 
 use Romanzaycev\Fundamenta\Components\Auth\Token;
 

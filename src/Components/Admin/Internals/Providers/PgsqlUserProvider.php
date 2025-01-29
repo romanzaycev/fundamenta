@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Admin\Providers;
+namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Providers;
 
 use Cycle\Database\DatabaseInterface;
 use Romanzaycev\Fundamenta\Components\Admin\AdminUser;
+use Romanzaycev\Fundamenta\Components\Admin\AdminUserProvider;
 use Romanzaycev\Fundamenta\Components\Auth\Token;
-use Romanzaycev\Fundamenta\Components\Auth\UserProvider;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\Infrastructure\Pgsql\Helper;
 use Romanzaycev\Fundamenta\Infrastructure\Pgsql\Traits\IsTableExistsTrait;
 
-class PgsqlUserProvider implements UserProvider
+class PgsqlUserProvider implements AdminUserProvider
 {
     use IsTableExistsTrait;
 

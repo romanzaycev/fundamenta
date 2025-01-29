@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Admin\Security;
+namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Security;
 
 use OpenSwoole\Http\Request;
 use OpenSwoole\Http\Response;
@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterInterface;
+use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\RequestHandlerInterface as OpenSwooleRequestHandler;
 use Romanzaycev\Fundamenta\Configuration;
 use Slim\Exception\HttpNotFoundException;
 
@@ -57,7 +58,7 @@ class AdminBaseGuard implements MiddlewareInterface, FilterInterface
         return $handler->handle($request);
     }
 
-    public function handle(Request $request, Response $response, \Romanzaycev\Fundamenta\Components\Server\OpenSwoole\RequestHandlerInterface $handler): void
+    public function handle(Request $request, Response $response, OpenSwooleRequestHandler $handler): void
     {
         if ($this->isEnabled) {
             if ($this->isPathMatched($request->server["request_uri"])) {

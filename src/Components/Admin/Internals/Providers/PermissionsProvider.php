@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Admin\Bootstrapping;
+namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Providers;
 
 use Romanzaycev\Fundamenta\Components\Rbac\Models\Permission;
 use Romanzaycev\Fundamenta\Components\Rbac\PermissionProvider;

@@ -36,6 +36,7 @@
     "cycle/schema-builder": "^2.9",
     "dflydev/fig-cookies": "^3.1",
     "haydenpierce/class-finder": "^0.5.1",
+    "lfkeitel/phptotp": "^1.1",
     "monolog/monolog": "^3.3",
     "nyholm/psr7": "^1.5",
     "nyholm/psr7-server": "^1.0",

@@ -2,15 +2,19 @@
 
 namespace Romanzaycev\Fundamenta\Components\Admin\Controllers;
 
+use lfkeitel\phptotp\Base32;
+use lfkeitel\phptotp\Totp;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Romanzaycev\Fundamenta\Components\Admin\AdminUser;
-use Romanzaycev\Fundamenta\Components\Admin\Providers\PgsqlUserProvider;
+use Romanzaycev\Fundamenta\Components\Admin\Internals\Providers\PermissionsProvider;
+use Romanzaycev\Fundamenta\Components\Admin\Internals\Providers\PgsqlUserProvider;
 use Romanzaycev\Fundamenta\Components\Auth\AuthHelper;
 use Romanzaycev\Fundamenta\Components\Auth\Context;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\HeaderTransport;
 use Romanzaycev\Fundamenta\Components\Http\GenericApiAnswer;
 use Romanzaycev\Fundamenta\Components\Http\HttpHelper;
+use Romanzaycev\Fundamenta\Components\Rbac\RbacManager;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\Exceptions\Domain\AccessDeniedException;
 use Slim\Exception\HttpUnauthorizedException;
@@ -20,6 +24,7 @@ readonly class Auth
     public function __construct(
         private PgsqlUserProvider $pgsqlUserProvider,
         private Configuration     $configuration,
+        private RbacManager       $rbacManager,
     ) {}
 
     /**
@@ -53,8 +58,31 @@ readonly class Auth
             throw new HttpUnauthorizedException($request, "Incorrect username or password");
         }
 
-        // FIXME: Check OTP
-        // $user->getTotpSecret() ...
+        if (!$this->rbacManager->hasPermission($user, PermissionsProvider::ADMIN_LOGIN)) {
+            throw new HttpUnauthorizedException($request, "You cannot perform this action");
+        }
+
+        if ($this->configuration->get("admin.security.auth.totp_required", false)) {
+            if (empty($answer2fa)) {
+                return HttpHelper::respond(
+                    GenericApiAnswer::success([
+                        "is_2fa_needed" => true,
+                    ]),
+                    response: $response,
+                );
+            }
+
+            $userTotpSecret = $user->getTotpSecret();
+
+            if (!empty($userTotpSecret)) {
+                $secret = Base32::decode($userTotpSecret);
+                $key = (new Totp())->GenerateToken($secret);
+
+                if ($answer2fa !== $key) {
+                    throw new HttpUnauthorizedException($request, "Incorrect 2FA answer");
+                }
+            }
+        }
 
         $user->setLastLogin(new \DateTimeImmutable());
 

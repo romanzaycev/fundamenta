@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Admin\Bootstrapping;
+namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Bootstrapping;
 
 use Romanzaycev\Fundamenta\Components\Admin\Controllers\Auth;
+use Romanzaycev\Fundamenta\Components\Admin\Internals\Providers\PermissionsProvider;
 use Romanzaycev\Fundamenta\Components\Rbac\Middlewares\PermissionGuardMiddleware;
 use Romanzaycev\Fundamenta\Configuration;
 use Slim\App;

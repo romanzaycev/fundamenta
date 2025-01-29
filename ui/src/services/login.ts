@@ -38,15 +38,15 @@ export class Login {
                 };
             }
 
-            const tData = data.data;
+            const payload = data.data;
 
-            if (!tData.is_2fa_needed) {
-                authHolder.updateByLoginResponse(tData);
+            if (!payload.is_2fa_needed) {
+                authHolder.updateByLoginResponse(payload);
             }
 
             return Promise.resolve({
                 isSuccess: true,
-                is2faNeeded: tData.is_2fa_needed,
+                is2faNeeded: payload.is_2fa_needed,
             });
         } catch (e) {
             return Promise.resolve({

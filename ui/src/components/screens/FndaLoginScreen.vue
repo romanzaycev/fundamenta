@@ -25,7 +25,19 @@
                             name="Password"
                             :rules="[
                                 (v) => Boolean(v) || 'Password is required',
-                                (v) => v.length > 6 || 'Password must be a least 6 symbols',
+                                (v) => v.length >= 6 || 'Password must be a least 6 symbols',
+                            ]"
+                        />
+                    </div>
+
+                    <div :class="bem('row')" v-if="store.is2faNeeded">
+                        <VaInput
+                            v-model="form.answer2fa"
+                            label="2FA password"
+                            type="string"
+                            name="string"
+                            :rules="[
+                                (v) => Boolean(v) || '2FA password is required',
                             ]"
                         />
                     </div>
@@ -102,6 +114,9 @@ export default defineComponent({
                 this.store.make(
                     this.form.login,
                     this.form.password,
+                    !this.form.answer2fa
+                        ? null
+                        : this.form.answer2fa,
                 );
             }
         },
@@ -110,6 +125,7 @@ export default defineComponent({
         const form = reactive({
             login: "",
             password: "",
+            answer2fa: null,
         });
         const {errorMessagesNamed} = useForm("login-form");
 

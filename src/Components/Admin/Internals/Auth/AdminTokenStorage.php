@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Admin\Bootstrapping;
+namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Auth;
 
 use DI\Container;
 use Psr\Http\Message\ServerRequestInterface;
-use Romanzaycev\Fundamenta\Components\Admin\Security\AdminToken;
 use Romanzaycev\Fundamenta\Components\Auth\Lifecycle;
 use Romanzaycev\Fundamenta\Components\Auth\Token;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorage;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSelector;
 use Romanzaycev\Fundamenta\Configuration;
+use function Romanzaycev\Fundamenta\Components\Admin\Bootstrapping\str_starts_with;
 
 class AdminTokenStorage implements TokenStorageSelector, TokenStorageProvider, TokenStorage
 {

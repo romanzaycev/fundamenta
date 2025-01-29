@@ -21,6 +21,9 @@ require dirname(__DIR__) . "/vendor/autoload.php";
                     "allowed_hosts" => [
                         "localhost",
                     ],
+                    "auth" => [
+                        "totp_required" => true,
+                    ],
                 ],
             ],
             "slim" => [

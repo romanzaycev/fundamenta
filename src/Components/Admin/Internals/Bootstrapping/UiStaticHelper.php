@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Admin\Bootstrapping;
+namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Bootstrapping;
 
 use Psr\Log\LoggerInterface;
-use Romanzaycev\Fundamenta\Components\Admin\Security\AdminBaseGuard;
+use Romanzaycev\Fundamenta\Components\Admin\Internals\Security\AdminBaseGuard;
 use Romanzaycev\Fundamenta\Components\Configuration\Env;
 use Romanzaycev\Fundamenta\Components\Http\Static\Directory;
 use Romanzaycev\Fundamenta\Components\Http\Static\File;

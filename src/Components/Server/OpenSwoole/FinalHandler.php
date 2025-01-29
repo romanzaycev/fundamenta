@@ -52,6 +52,7 @@ class FinalHandler implements RequestHandlerInterface
             $request->server["request_uri"],
             $request->header,
             $request->rawContent() ? $request->rawContent() : "php://memory",
+            serverParams: array_change_key_case($request->server, CASE_UPPER),
         ))
             ->withUploadedFiles($files)
             ->withCookieParams($request->cookie ?? []);
