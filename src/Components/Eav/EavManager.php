@@ -2,6 +2,7 @@
 
 namespace Romanzaycev\Fundamenta\Components\Eav;
 
+use Romanzaycev\Fundamenta\Components\Eav\Internals\Executor;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\AttributeRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\EntityRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\TypeRepositoryInterface;

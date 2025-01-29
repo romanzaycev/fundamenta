@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Eav;
+namespace Romanzaycev\Fundamenta\Components\Eav\Internals;
 
 final class InternalLogicOps
 {

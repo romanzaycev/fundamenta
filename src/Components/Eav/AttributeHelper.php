@@ -19,7 +19,7 @@ final class AttributeHelper
 
     public static function isEntityOwned(string $code): bool
     {
-        if (str_starts_with($code, "ee.")) {
+        if (\str_starts_with($code, "ee.")) {
             $code = str_replace("ee.", "", $code);
         }
 

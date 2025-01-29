@@ -65,6 +65,12 @@ class Admin extends ModuleBootstrapper
                         "class" => PermissionsProvider::class,
                     ],
                 ],
+
+                "misc" => [
+                    "title" => [
+                        "app_name" => "Fundamenta",
+                    ],
+                ],
             ],
             [
                 "paths",

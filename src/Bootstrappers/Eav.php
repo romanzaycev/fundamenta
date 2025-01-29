@@ -3,8 +3,8 @@
 namespace Romanzaycev\Fundamenta\Bootstrappers;
 
 use DI\ContainerBuilder;
-use Romanzaycev\Fundamenta\Components\Eav\Executor;
 use Romanzaycev\Fundamenta\Components\Eav\Impl\Pgsql as PgsqlImpl;
+use Romanzaycev\Fundamenta\Components\Eav\Internals\Executor;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\AttributeRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\EntityRepositoryInterface;
 use Romanzaycev\Fundamenta\Components\Eav\Repositories\SchemaInitializerInterface;

@@ -3,7 +3,7 @@
 namespace Romanzaycev\Fundamenta\Bootstrappers;
 
 use DI\ContainerBuilder;
-use Romanzaycev\Fundamenta\Components\Rbac\GenericRbacManager;
+use Romanzaycev\Fundamenta\Components\Rbac\Internals\GenericRbacManager;
 use Romanzaycev\Fundamenta\Components\Rbac\Middlewares\PermissionGuardMiddleware;
 use Romanzaycev\Fundamenta\Components\Rbac\PermissionHolder;
 use Romanzaycev\Fundamenta\Components\Rbac\PermissionProvider;

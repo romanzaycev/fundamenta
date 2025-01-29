@@ -4,7 +4,7 @@ namespace Romanzaycev\Fundamenta\Components\Auth\Session;
 
 use DI\Container;
 use Psr\Http\Message\ServerRequestInterface;
-use Romanzaycev\Fundamenta\Components\Auth\Lifecycle;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorageLifecycle;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorage;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
 
@@ -20,8 +20,8 @@ class SessionTokenStorageProvider implements TokenStorageProvider
         return new SessionTokenStorage($request);
     }
 
-    public function getLifecycle(): Lifecycle
+    public function getLifecycle(): TokenStorageLifecycle
     {
-        return Lifecycle::PER_REQUEST;
+        return TokenStorageLifecycle::PER_REQUEST;
     }
 }

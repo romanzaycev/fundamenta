@@ -2,8 +2,9 @@
 
 namespace Romanzaycev\Fundamenta\Components\Eav;
 
+use Romanzaycev\Fundamenta\Components\Eav\Internals\InternalLogicOps;
+use Romanzaycev\Fundamenta\Components\Eav\Internals\LogicCompiler;
 use Romanzaycev\Fundamenta\Components\Eav\QueryBuilder\DebugMerger;
-use Romanzaycev\Fundamenta\Components\Eav\QueryBuilder\LogicCompiler;
 
 /**
  * @phpstan-type FilterValue string|float|bool|null|int|\DateTimeInterface|array

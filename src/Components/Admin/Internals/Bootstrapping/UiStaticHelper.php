@@ -57,11 +57,12 @@ final readonly class UiStaticHelper
                     $this->resourcesDir . "/index.html",
                 ))
                     ->setPreprocessor(
-                        static fn (string $content): string => self::preprocessIndex(
+                        fn (string $content): string => self::preprocessIndex(
                             $content,
                             $basePath,
                             $apiBasePath,
-                        )
+                            $this->configuration->get("admin.misc.title.app_name", "Fundamenta"),
+                        ),
                     )
                     ->asVirtualRewrite(true),
             ];
@@ -78,7 +79,12 @@ final readonly class UiStaticHelper
         }
     }
 
-    private static function preprocessIndex(string $content, string $basePath, string $apiBasePath): string
+    private static function preprocessIndex(
+        string $content,
+        string $basePath,
+        string $apiBasePath,
+        string $appTitle,
+    ): string
     {
         $__fndaapp = [
             "env" => [
@@ -90,6 +96,7 @@ final readonly class UiStaticHelper
 
         $content = str_replace("/app.", $basePath . "/app.", $content);
         $content = str_replace("</head>", "\n<script>window.__fndaapp=".json_encode($__fndaapp).";</script>\n" . "</head>", $content);
+        $content = str_replace("%TITLE_APP_NAME%", $appTitle, $content);
 
         return $content;
     }

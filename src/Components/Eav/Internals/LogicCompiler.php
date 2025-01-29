@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Eav\QueryBuilder;
+namespace Romanzaycev\Fundamenta\Components\Eav\Internals;
 
-use Romanzaycev\Fundamenta\Components\Eav\InternalLogicOps;
 use Romanzaycev\Fundamenta\Components\Eav\Logic;
 use Romanzaycev\Fundamenta\Components\Eav\Operator;
 
@@ -23,7 +22,7 @@ readonly class LogicCompiler
             case InternalLogicOps::OP_OR:
                 $result = $this->createEmptySetNode($node->getOp());
 
-                if (str_starts_with($field, InternalLogicOps::SINGLE_OR_PFX)) {
+                if (\str_starts_with($field, InternalLogicOps::SINGLE_OR_PFX)) {
                     return $this->iterateWhere($node, $result);
                 } else {
                     return $this->iterateWhere($node, $result, $field);

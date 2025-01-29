@@ -1,9 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Auth;
+namespace Romanzaycev\Fundamenta\Components\Auth\Internals;
 
 use DI\Container;
 use Psr\Http\Message\ServerRequestInterface;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorage;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSource;
 use Romanzaycev\Fundamenta\Exceptions\Domain\EntityNotFoundException;
 
 class TokenStorageHolder implements TokenStorageSource

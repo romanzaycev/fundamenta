@@ -4,13 +4,12 @@ namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Auth;
 
 use DI\Container;
 use Psr\Http\Message\ServerRequestInterface;
-use Romanzaycev\Fundamenta\Components\Auth\Lifecycle;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorageLifecycle;
 use Romanzaycev\Fundamenta\Components\Auth\Token;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorage;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSelector;
 use Romanzaycev\Fundamenta\Configuration;
-use function Romanzaycev\Fundamenta\Components\Admin\Bootstrapping\str_starts_with;
 
 class AdminTokenStorage implements TokenStorageSelector, TokenStorageProvider, TokenStorage
 {
@@ -57,14 +56,14 @@ class AdminTokenStorage implements TokenStorageSelector, TokenStorageProvider, T
         throw new \RuntimeException("Not applicable");
     }
 
-    public function getLifecycle(): Lifecycle
+    public function getLifecycle(): TokenStorageLifecycle
     {
-        return Lifecycle::PERSISTENT;
+        return TokenStorageLifecycle::PERSISTENT;
     }
 
     public function select(ServerRequestInterface $request, array $storages): ?string
     {
-        if (str_starts_with($request->getRequestTarget(), $this->apiBasePath)) {
+        if (\str_starts_with($request->getRequestTarget(), $this->apiBasePath)) {
             return self::class;
         }
 

@@ -3,7 +3,7 @@
 namespace Romanzaycev\Fundamenta\Components\Eav\QueryBuilder;
 
 use Romanzaycev\Fundamenta\Components\Eav\Exceptions\QueryException;
-use Romanzaycev\Fundamenta\Components\Eav\InternalLogicOps;
+use Romanzaycev\Fundamenta\Components\Eav\Internals\InternalLogicOps;
 use Romanzaycev\Fundamenta\Components\Eav\Operator;
 
 trait GenericMerger

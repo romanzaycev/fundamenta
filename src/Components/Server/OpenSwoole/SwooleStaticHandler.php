@@ -46,7 +46,7 @@ class SwooleStaticHandler implements StaticHandler
             }
 
             foreach ($this->directories as $probRequestedDir => $directory) {
-                if (str_starts_with($requestPath, $probRequestedDir)) {
+                if (\str_starts_with($requestPath, $probRequestedDir)) {
                     $this->respondFileFromDirectory(
                         $directory,
                         mb_substr($requestPath, mb_strlen($probRequestedDir)),
@@ -133,7 +133,7 @@ class SwooleStaticHandler implements StaticHandler
                 $filePubPath = $file->getPublicFile();
                 $filePubPath .= "/";
 
-                if (str_starts_with($requestPath, $filePubPath)) {
+                if (\str_starts_with($requestPath, $filePubPath)) {
                     return $file;
                 }
             }

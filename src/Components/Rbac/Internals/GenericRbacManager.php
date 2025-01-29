@@ -1,8 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Rbac;
+namespace Romanzaycev\Fundamenta\Components\Rbac\Internals;
 
 use Romanzaycev\Fundamenta\Components\Auth\User;
+use Romanzaycev\Fundamenta\Components\Rbac\Permission;
+use Romanzaycev\Fundamenta\Components\Rbac\PermissionRepository;
+use Romanzaycev\Fundamenta\Components\Rbac\RbacManager;
+use Romanzaycev\Fundamenta\Components\Rbac\Role;
+use Romanzaycev\Fundamenta\Components\Rbac\RoleRepository;
 
 class GenericRbacManager implements RbacManager
 {

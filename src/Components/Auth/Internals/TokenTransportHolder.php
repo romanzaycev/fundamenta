@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Auth;
+namespace Romanzaycev\Fundamenta\Components\Auth\Internals;
 
 use Romanzaycev\Fundamenta\Components\Auth\Transport\HttpTransport;
+use Romanzaycev\Fundamenta\Components\Auth\TransportSource;
 use Romanzaycev\Fundamenta\Exceptions\Domain\EntityNotFoundException;
 
 class TokenTransportHolder implements TransportSource

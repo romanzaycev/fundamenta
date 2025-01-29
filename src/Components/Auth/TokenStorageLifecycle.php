@@ -2,7 +2,7 @@
 
 namespace Romanzaycev\Fundamenta\Components\Auth;
 
-enum Lifecycle : int
+enum TokenStorageLifecycle : int
 {
     case PERSISTENT = 1;
     case PER_REQUEST = 2;

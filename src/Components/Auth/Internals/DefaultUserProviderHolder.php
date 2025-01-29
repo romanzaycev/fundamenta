@@ -1,6 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Romanzaycev\Fundamenta\Components\Auth;
+namespace Romanzaycev\Fundamenta\Components\Auth\Internals;
+
+use Romanzaycev\Fundamenta\Components\Auth\UserProvider;
+use Romanzaycev\Fundamenta\Components\Auth\UserProviderHolder;
 
 class DefaultUserProviderHolder implements UserProviderHolder
 {

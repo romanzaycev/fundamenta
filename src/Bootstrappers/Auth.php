@@ -5,16 +5,16 @@ namespace Romanzaycev\Fundamenta\Bootstrappers;
 use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Http\Message\ServerRequestInterface;
-use Romanzaycev\Fundamenta\Components\Auth\Lifecycle;
+use Romanzaycev\Fundamenta\Components\Auth\Internals\DefaultUserProviderHolder;
+use Romanzaycev\Fundamenta\Components\Auth\Internals\TokenStorageHolder;
+use Romanzaycev\Fundamenta\Components\Auth\Internals\TokenTransportHolder;
 use Romanzaycev\Fundamenta\Components\Auth\Middlewares\AuthedContextMiddleware;
-use Romanzaycev\Fundamenta\Components\Auth\TokenStorageHolder;
+use Romanzaycev\Fundamenta\Components\Auth\TokenStorageLifecycle;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageProvider;
 use Romanzaycev\Fundamenta\Components\Auth\TokenStorageSelector;
-use Romanzaycev\Fundamenta\Components\Auth\TokenTransportHolder;
 use Romanzaycev\Fundamenta\Components\Auth\TokenTransportProvider;
 use Romanzaycev\Fundamenta\Components\Auth\Transport\CookieTransport;
 use Romanzaycev\Fundamenta\Components\Auth\UserProvider;
-use Romanzaycev\Fundamenta\Components\Auth\DefaultUserProviderHolder;
 use Romanzaycev\Fundamenta\Components\Auth\UserProviderHolder;
 use Romanzaycev\Fundamenta\Components\Startup\HookManager;
 use Romanzaycev\Fundamenta\Components\Startup\Provisioning\ProvisionDecl;
@@ -100,11 +100,11 @@ class Auth extends ModuleBootstrapper
                         $cycle = $provider->getLifecycle();
 
                         switch ($cycle) {
-                            case Lifecycle::PERSISTENT:
+                            case TokenStorageLifecycle::PERSISTENT:
                                 $storageHolder->addPersistent($provider->createPersistent($container));
                                 break;
 
-                            case Lifecycle::PER_REQUEST:
+                            case TokenStorageLifecycle::PER_REQUEST:
                                 $storageHolder->registerForRequestProvider($provider);
                                 break;
 
