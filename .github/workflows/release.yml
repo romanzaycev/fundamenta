@@ -102,3 +102,11 @@ jobs:
           asset_path: ./release/package.zip
           asset_name: package.zip
           asset_content_type: application/zip
+
+      - name: Packagist push Update
+        uses: mnavarrocarter/packagist-update@v1.0
+        with:
+          username: "romanzaycev"
+          api_token: ${{ secrets.packagist_token }}
+          package_name: romanzaycev/fundamenta
+          domain: "packagist.org"
