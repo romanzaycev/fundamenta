@@ -26,7 +26,7 @@ jobs:
 
       - name: Commit built JS
         run: |
-          git addm -f ui-public
+          git add -f ui-public
           git commit -m "Include built JS for ${GITHUB_REF#refs/tags/}"
 
       - name: Update Git tag
