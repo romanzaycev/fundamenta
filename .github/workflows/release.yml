@@ -34,6 +34,7 @@ jobs:
 
       - name: Update Git tag
         run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
           TAG_NAME=${GITHUB_REF#refs/tags/}
           git tag -f $TAG_NAME
           git push origin $TAG_NAME --force
