@@ -11,3 +11,4 @@
 /package-lock.json export-ignore
 /tsconfig.json     export-ignore
 /node_modules      export-ignore
+/release           export-ignore

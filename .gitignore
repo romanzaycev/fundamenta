@@ -9,3 +9,4 @@ composer.lock
 !/devsite/runtime/.gitkeep
 /ui-public
 /ui/assets/svg-sprite/
+/release/
