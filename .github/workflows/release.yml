@@ -23,7 +23,7 @@ jobs:
           php-version: '8.3'
 
       - name: Composer install
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress --no-suggest --ignore-platform-req=ext-openswoole
 
       - name: Run PHP code checks
         run: composer run checks
