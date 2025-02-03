@@ -70,6 +70,12 @@ jobs:
           git add composer.json
           git commit -m "Update composer.json dist URL for release ${TAG}"
 
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
       - name: Create ZIP archive
         run: |
           mkdir -p release
