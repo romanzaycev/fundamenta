@@ -90,5 +90,8 @@
     "allow-plugins": {
       "php-http/discovery": false
     }
+  },
+  "dist": {
+    "url": "https://github.com/romanzaycev/fundamenta/releases/download/0.0.1/package.zip"
   }
 }
