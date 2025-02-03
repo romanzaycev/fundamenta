@@ -26,14 +26,14 @@ jobs:
 
       - name: Commit built JS
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git add -f ui-public
           git commit -m "Include built JS for ${GITHUB_REF#refs/tags/}"
 
       - name: Update Git tag
         run: |
-          git remote set-url origin https://"${{ github.actor }}":"${{ secrets.GITHUB_TOKEN }}"@github.com/$GITHUB_REPOSITORY.git
+          git remote set-url origin https://"${{ github.actor }}":"${{ secrets.GITHUB_TOKEN }}"@github.com/$GITHUB_REPOSITORY
           TAG_NAME=${GITHUB_REF#refs/tags/}
           git tag -f $TAG_NAME
           git push origin $TAG_NAME --force
