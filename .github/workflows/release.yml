@@ -26,6 +26,8 @@ jobs:
 
       - name: Commit built JS
         run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           git add -f ui-public
           git commit -m "Include built JS for ${GITHUB_REF#refs/tags/}"
 
