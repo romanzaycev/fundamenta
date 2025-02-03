@@ -117,6 +117,10 @@ readonly class Auth
 
         $user = $this->pgsqlUserProvider->getUser($token);
 
+        if (!$user) {
+            throw new AccessDeniedException();
+        }
+
         if (!$user->isActive()) {
             throw new AccessDeniedException();
         }

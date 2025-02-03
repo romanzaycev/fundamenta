@@ -16,8 +16,14 @@ use function DI\get;
 
 class ContainerConfigurator
 {
+    protected static bool $isConfigured = false;
+
     public static function configure(ContainerBuilder $builder, Configuration $configuration): void
     {
+        if (self::$isConfigured) {
+            return;
+        }
+
         /** @var class-string<AdminUserProvider> $userProviderClass */
         $userProviderClass = $configuration->get("admin.providers.users.class");
         /** @var class-string<RoleProvider> $rolesProviderClass */
@@ -48,5 +54,7 @@ class ContainerConfigurator
         }
 
         $builder->addDefinitions($definitions);
+
+        self::$isConfigured = true;
     }
 }

@@ -11,18 +11,24 @@ use Romanzaycev\Fundamenta\Components\Http\Static\StaticHandler;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterCollection;
 use Romanzaycev\Fundamenta\Configuration;
 
-final readonly class UiStaticHelper
+class UiStaticHelper
 {
+    protected bool $isConfigured = false;
+
     public function __construct(
-        private StaticHandler    $staticHandler,
-        private Configuration    $configuration,
-        private LoggerInterface  $logger,
-        private FilterCollection $filterCollection,
-        private string           $resourcesDir,
+        private readonly StaticHandler    $staticHandler,
+        private readonly Configuration    $configuration,
+        private readonly LoggerInterface  $logger,
+        private readonly FilterCollection $filterCollection,
+        private readonly string           $resourcesDir,
     ) {}
 
     public function configure(): void
     {
+        if ($this->isConfigured) {
+            return;
+        }
+
         if (!file_exists($this->resourcesDir) || !is_dir($this->resourcesDir)) {
             $this
                 ->logger
@@ -77,9 +83,11 @@ final readonly class UiStaticHelper
                     AdminBaseGuard::class,
                 );
         }
+
+        $this->isConfigured = true;
     }
 
-    private static function preprocessIndex(
+    protected static function preprocessIndex(
         string $content,
         string $basePath,
         string $apiBasePath,

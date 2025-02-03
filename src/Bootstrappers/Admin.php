@@ -71,6 +71,12 @@ class Admin extends ModuleBootstrapper
                         "app_name" => "Fundamenta",
                     ],
                 ],
+
+                "ui" => [
+                    "resources" => [
+                        "directory" => null,
+                    ],
+                ],
             ],
             [
                 "paths",
@@ -114,9 +120,17 @@ class Admin extends ModuleBootstrapper
             );
         }
 
-        $resourcesDir = dirname(__DIR__, 2) . "/ui-public";
         $container
-            ->make(UiStaticHelper::class, ["resourcesDir" => $resourcesDir])
+            ->make(
+                UiStaticHelper::class,
+                [
+                    "resourcesDir" => $configuration
+                        ->get(
+                            "admin.ui.resources.directory",
+                            dirname(__DIR__, 2) . "/ui-public",
+                        ),
+                ]
+            )
             ->configure();
     }
 

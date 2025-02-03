@@ -3,6 +3,7 @@
 namespace Romanzaycev\Fundamenta\Components\Admin\Internals\Bootstrapping;
 
 use Romanzaycev\Fundamenta\Components\Admin\Controllers\Auth;
+use Romanzaycev\Fundamenta\Components\Admin\Controllers\Ping;
 use Romanzaycev\Fundamenta\Components\Admin\Internals\Providers\PermissionsProvider;
 use Romanzaycev\Fundamenta\Components\Rbac\Middlewares\PermissionGuardMiddleware;
 use Romanzaycev\Fundamenta\Configuration;
@@ -11,7 +12,7 @@ use Slim\Routing\RouteCollectorProxy;
 
 class Routing
 {
-    private bool $isConfigured = false;
+    protected bool $isConfigured = false;
 
     public function __construct(
         private readonly Configuration $configuration,
@@ -36,6 +37,7 @@ class Routing
                             "",
                             function (RouteCollectorProxy $protectedGroup) {
                                 $protectedGroup->post("/refresh", Auth::class . ":refresh");
+                                $protectedGroup->get("/is-alive", Ping::class . ":isAlive");
                             }
                         )
                         ->addMiddleware(

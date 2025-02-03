@@ -33,17 +33,23 @@ export class Api {
 
     public async fetch(endpoint: string, options: FetchOptions = {}): Promise<Response>
     {
+        const method = options.method ?? HttpMethod.GET;
         let url = `${this.baseUri}${this.normalizeEndpoint(endpoint)}`;
+
+        const defHeaders = {
+            "Accept": "application/json",
+        };
+
+        if (method !== HttpMethod.GET) {
+            defHeaders["Content-Type"] = "application/json";
+        }
+
         const headers = Object.assign(
             {},
-            {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            },
+            defHeaders,
             options.headers ?? {},
         );
         await this.authHolder.prepare(endpoint, headers);
-        const method = options.method ?? HttpMethod.GET;
         const fetchParams = {
             method: method,
             mode: "cors",

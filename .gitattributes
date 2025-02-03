@@ -1,13 +1,13 @@
-/.gitattributes export-ignore
-/.gitignore     export-ignore
-/.github        export-ignore
-/phpunit.xml    export-ignore
-/tests          export-ignore
-/build          export-ignore
-/.env.dist      export-ignore
-/devsite        export-ignore
-/README.md      export-ignore
-/package.json
-/package-lock.json
-/tsconfig.json
-/node_modules
+/.gitattributes    export-ignore
+/.gitignore        export-ignore
+/.github           export-ignore
+/phpunit.xml       export-ignore
+/tests             export-ignore
+/build             export-ignore
+/.env.dist         export-ignore
+/devsite           export-ignore
+/README.md         export-ignore
+/package.json      export-ignore
+/package-lock.json export-ignore
+/tsconfig.json     export-ignore
+/node_modules      export-ignore

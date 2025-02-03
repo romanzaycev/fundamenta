@@ -82,7 +82,16 @@ export class AuthHolder {
             );
 
             if (response.status !== 200) {
-                return Promise.reject(new Error(`Bad status: ${response.status}`));
+                if (this.waiting.length > 0) {
+                    this.waiting.forEach((c) => {
+                        c(response.statusText);
+                    });
+                    this.waiting = [];
+                }
+
+                this.isPreparing = false;
+
+                return Promise.reject(new Error(`Bad status: ${response.statusText}`));
             }
 
             const body = await response.json();
