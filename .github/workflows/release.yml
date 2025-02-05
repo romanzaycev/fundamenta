@@ -82,7 +82,6 @@ jobs:
         run: |
           mkdir -p release
           zip -r release/package.zip composer.json src ui-public
-          ls -lha release
 
       - name: Create GitHub Release
         id: create_release
