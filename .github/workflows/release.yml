@@ -85,15 +85,16 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.event.inputs.version }}
-          release_name: Release ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          make_latest: true
           draft: false
           prerelease: false
-          commitish: ${{ steps.composer_update_info.outputs.commitish }}
+          target_commitish: ${{ steps.composer_update_info.outputs.commitish }}
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
