@@ -71,6 +71,7 @@
     "test-nc": "phpunit --no-coverage",
     "phplint": "phplint -c .phplint.yml",
     "phpstan": "phpstan analyse -c phpstan.neon --ansi --xdebug",
+    "phpstan-ci": "phpstan analyse -c phpstan.neon --ansi",
     "start": [
       "Composer\\Config::disableProcessTimeout",
       "XDEBUG_MODE=off php -dxdebug.mode=off devsite/server.php"
@@ -78,6 +79,11 @@
     "checks": [
       "@phplint",
       "@phpstan",
+      "@test-nc"
+    ],
+    "checks-ci": [
+      "@phplint",
+      "@phpstan-ci",
       "@test-nc"
     ]
   },
