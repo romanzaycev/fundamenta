@@ -6,6 +6,7 @@ use Romanzaycev\Fundamenta\Components\Auth\Session\SessionTokenStorage;
 use Romanzaycev\Fundamenta\Components\Configuration\ArrayLoader;
 use Cycle\Database\Config as DbConfig;
 use Romanzaycev\Fundamenta\Components\Configuration\Env;
+use Romanzaycev\Fundamenta\Components\Configuration\LazyIntEnv;
 use Romanzaycev\Fundamenta\Components\Configuration\LazyValue;
 
 require dirname(__DIR__) . "/vendor/autoload.php";
@@ -34,7 +35,7 @@ require dirname(__DIR__) . "/vendor/autoload.php";
             "openswoole" => [
                 "settings" => [
                     "document_root" => __DIR__ . "/public",
-                    "max_request" => 1,
+                    "max_request" => new LazyIntEnv("SWOOLE_MAX_REQUEST", 1),
                 ],
             ],
             "tooolooop" => [

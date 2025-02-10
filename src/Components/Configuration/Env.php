@@ -4,19 +4,19 @@ namespace Romanzaycev\Fundamenta\Components\Configuration;
 
 class Env
 {
-    public static function getBool(string $variable, bool $default): bool
+    public static function getBool(string $variable, ?bool $default): ?bool
     {
         $value = self::get($variable, $default);
 
         return $value === "1" || $value === "true" || $value === true;
     }
 
-    public static function getString(string $variable, string $default): string
+    public static function getString(string $variable, ?string $default): ?string
     {
         return self::get($variable, $default);
     }
 
-    public static function getInt(string $variable, int $default): int
+    public static function getInt(string $variable, ?int $default): ?int
     {
         return (int)self::get($variable, $default);
     }
