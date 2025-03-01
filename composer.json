@@ -57,7 +57,8 @@
     "symfony/cache": "^6.2",
     "symfony/event-dispatcher": "^7.2",
     "vlucas/phpdotenv": "^5.5",
-    "vlucas/valitron": "^1.4"
+    "vlucas/valitron": "^1.4",
+    "wikimedia/ip-set": "^4.0"
   },
   "require-dev": {
     "jetbrains/phpstorm-attributes": "^1.0",

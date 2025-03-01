@@ -15,6 +15,7 @@ use Romanzaycev\Fundamenta\Components\Auth\Transport\HeaderTransport;
 use Romanzaycev\Fundamenta\Components\Http\GenericApiAnswer;
 use Romanzaycev\Fundamenta\Components\Http\HttpHelper;
 use Romanzaycev\Fundamenta\Components\Rbac\RbacManager;
+use Romanzaycev\Fundamenta\Components\TrustedProxy\TrustedProxyMiddleware;
 use Romanzaycev\Fundamenta\Configuration;
 use Romanzaycev\Fundamenta\Exceptions\Domain\AccessDeniedException;
 use Slim\Exception\HttpUnauthorizedException;
@@ -91,7 +92,7 @@ readonly class Auth
         }
 
         $user->setLastUa($request->getHeaderLine("User-Agent"));
-        $user->setLastIp($request->getServerParams()['REMOTE_ADDR'] ?? null);
+        $user->setLastIp($this->getClientIp($request));
 
         $this
             ->pgsqlUserProvider
@@ -172,5 +173,14 @@ readonly class Auth
             ]),
             response: $response,
         );
+    }
+
+    private function getClientIp(ServerRequestInterface $request): ?string
+    {
+        if ($ip = $request->getAttribute(TrustedProxyMiddleware::CLIENT_IP_ATTRIBUTE)) {
+            return $ip;
+        }
+
+        return $request->getServerParams()["REMOTE_ADDR"] ?? null;
     }
 }

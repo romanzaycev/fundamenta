@@ -69,6 +69,12 @@ require dirname(__DIR__) . "/vendor/autoload.php";
                     ),
                 ]),
             ],
+            "trusted-proxy" => [
+                "enabled" => true,
+                "proxies" => [
+                    "127.0.0.1",
+                ],
+            ],
         ]),
         [
             Site::class,

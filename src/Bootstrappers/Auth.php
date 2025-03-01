@@ -160,6 +160,7 @@ class Auth extends ModuleBootstrapper
     public static function requires(): array
     {
         return [
+            TrustedProxy::class,
             Session::class,
         ];
     }
