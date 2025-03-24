@@ -2,13 +2,11 @@
 
 namespace Romanzaycev\Fundamenta;
 
+use DI\Container;
 use DI\ContainerBuilder;
-use OpenSwoole\Server;
-use Psr\Http\Message\ServerRequestInterface;
+use OpenSwoole\Http\Server;
 use Psr\Log\LoggerInterface;
 use Romanzaycev\Fundamenta\Components\Configuration\ConfigurationLoader;
-use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\FilterPipeline;
-use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\OpenSwooleHelper;
 use Romanzaycev\Fundamenta\Components\Server\OpenSwoole\ServerFactory;
 use Romanzaycev\Fundamenta\Components\Startup\Bootstrapper;
 use Romanzaycev\Fundamenta\Components\Startup\DefaultModuleManager;
@@ -80,20 +78,14 @@ class ApplicationBuilder
         $server = $serverFactory->createServer();
         $hookManager = $this->createHookManager($container->get(LoggerInterface::class));
         $container->set(HookManager::class, $hookManager);
-
-        OpenSwooleHelper::handle(
+        $logger = $container->get(LoggerInterface::class);
+        $app = $this->createApplication(
             $server,
-            function (ServerRequestInterface $request) use ($slimApp, $container, $hookManager) {
-                $hookManager->call($container, HookManager::ON_REQUEST, $request);
-                $result = $slimApp->handle($request);
-                $hookManager->call($container, HookManager::ON_REQUEST_TERMINATED);
-
-                return $result;
-            },
-            $container->get(FilterPipeline::class),
+            $slimApp,
+            $container,
+            $hookManager,
+            $logger,
         );
-
-        $app = $this->createApplication($server);
         $container->set(Application::class, $app);
 
         $modulesConfigurator->afterContainerBuilt($container);
@@ -170,9 +162,21 @@ class ApplicationBuilder
         }
     }
 
-    protected function createApplication(Server $server): Application
+    protected function createApplication(
+        Server $server,
+        App $slim,
+        Container $container,
+        HookManager $hookManager,
+        LoggerInterface $logger,
+    ): Application
     {
-        return new Application($server);
+        return new Application(
+            $server,
+            $slim,
+            $container,
+            $hookManager,
+            $logger,
+        );
     }
 
     protected function createHookManager(LoggerInterface $logger): HookManager
