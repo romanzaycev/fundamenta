@@ -71,6 +71,9 @@ class Application
             },
             $this->container->get(FilterPipeline::class),
         );
+        $this->server->on("start", function () {
+            $this->hookManager->call($this->container, HookManager::ON_SERVER_STARTED);
+        });
         $this->server->start();
         $this->isStarted = true;
     }
