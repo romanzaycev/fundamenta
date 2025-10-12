@@ -74,8 +74,9 @@ class ApplicationBuilder
         $slimApp = AppFactory::create();
         $container->set(App::class, $slimApp);
 
-        $serverFactory = $container->get(ServerFactory::class);
+        $serverFactory = $this->createServerFactory($container);
         $server = $serverFactory->createServer();
+
         $hookManager = $this->createHookManager($container->get(LoggerInterface::class));
         $container->set(HookManager::class, $hookManager);
         $logger = $container->get(LoggerInterface::class);
@@ -131,6 +132,15 @@ class ApplicationBuilder
             $this->bootstrappers,
             $moduleManager,
         );
+    }
+
+    /**
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    protected function createServerFactory(Container $container): ServerFactory
+    {
+        return $container->get(ServerFactory::class);
     }
 
     /**
