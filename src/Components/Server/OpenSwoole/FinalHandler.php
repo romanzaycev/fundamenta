@@ -47,7 +47,7 @@ class FinalHandler implements RequestHandlerInterface
             }
         }
 
-        return (new ServerRequest(
+        $psrRequest = (new ServerRequest(
             $request->server["request_method"],
             $request->server["request_uri"],
             $request->header,
@@ -55,6 +55,13 @@ class FinalHandler implements RequestHandlerInterface
             serverParams: array_change_key_case($request->server, CASE_UPPER),
         ))
             ->withUploadedFiles($files)
-            ->withCookieParams($request->cookie ?? []);
+            ->withCookieParams($request->cookie ?? [])
+        ;
+
+        if ($request->getMethod() === "GET") {
+            $psrRequest = $psrRequest->withQueryParams($request->get ?? []);
+        }
+
+        return $psrRequest;
     }
 }
